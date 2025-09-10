@@ -24,7 +24,7 @@ export default function Home() {
       <main className="container mx-auto flex-1 px-4 py-8 md:px-6">
         <MainView />
       </main>
-      <footer className="space-y-0 py-6 text-center text-sm text-foreground/50">
+      <footer className="w-full py-4 text-center text-sm text-foreground/50">
         <AnimatedText text="Created by SPR AI Edutech" />
         <AnimatedText text="Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287" />
       </footer>
