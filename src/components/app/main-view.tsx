@@ -6,6 +6,7 @@ import { generateModelAction, createAnimationAction } from '@/app/actions';
 import ControlPanel from './control-panel';
 import PreviewPanel from './preview-panel';
 import { useToast } from "@/hooks/use-toast";
+import { MapPin } from 'lucide-react';
 
 const stylePresets = [
   { id: 'realistic', label: 'Realistic', description: 'Aims for a photorealistic representation.' },
@@ -18,9 +19,10 @@ const stylePresets = [
 const initialModelState: { meshDataUri: string | null; previewImageUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, previewImageUri: null, videoDataUri: null, error: null };
 const initialAnimationState: { meshDataUri: string | null; previewImageUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, previewImageUri: null, videoDataUri: null, error: null };
 
-const AnimatedText = ({ text, className }: { text: string; className?: string }) => {
+const AnimatedText = ({ text, className, children }: { text: string; className?: string, children?: React.ReactNode }) => {
     return (
-      <p className={`animated-title ${className}`}>
+      <p className={`animated-title flex items-center justify-center gap-2 ${className}`}>
+        {children}
         {text.split('').map((letter, index) => (
           <span
             key={index}
@@ -93,7 +95,7 @@ export default function MainView() {
         </form>
       </div>
       <div className="lg:col-span-8 xl:col-span-9">
-        <div className="flex flex-col h-full">
+        <div className="flex h-full flex-col">
             <div className="flex-1">
                 <PreviewPanel 
                     meshDataUri={displayState.meshDataUri}
@@ -107,7 +109,9 @@ export default function MainView() {
             </div>
             <footer className="w-full py-4 text-center text-sm text-foreground/50">
                 <AnimatedText text="Created by SPR AI Edutech" />
-                <AnimatedText text="Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287" />
+                <AnimatedText text="Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287">
+                    <MapPin className="h-4 w-4" />
+                </AnimatedText>
             </footer>
         </div>
       </div>
