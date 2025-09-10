@@ -20,23 +20,6 @@ const stylePresets = [
 const initialModelState: { meshDataUri: string | null; previewImageUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, previewImageUri: null, videoDataUri: null, error: null };
 const initialAnimationState: { meshDataUri: string | null; previewImageUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, previewImageUri: null, videoDataUri: null, error: null };
 
-const AnimatedText = ({ text, className, children }: { text: string; className?: string, children?: React.ReactNode }) => {
-    return (
-      <p className={cn('animated-title flex items-center justify-center gap-2', className)}>
-        {children}
-        {text.split('').map((letter, index) => (
-          <span
-            key={index}
-            className="animated-letter"
-            style={{ animationDelay: `${index * 0.05}s` }}
-          >
-            {letter === ' ' ? '\u00A0' : letter}
-          </span>
-        ))}
-      </p>
-    );
-  };
-
 export default function MainView() {
   const [modelState, modelAction, isModelPending] = useActionState(generateModelAction, initialModelState);
   const [animationState, animationAction, isAnimationPending] = useActionState(createAnimationAction, initialAnimationState);
@@ -109,10 +92,11 @@ export default function MainView() {
                 />
             </div>
             <footer className="w-full py-4 text-center text-sm text-foreground/50">
-                <AnimatedText text="Created by SPR AI Edutech" />
-                <AnimatedText text="Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287">
-                    <MapPin className="h-4 w-4" />
-                </AnimatedText>
+              <p>Created by SPR AI Edutech</p>
+              <p className="flex items-center justify-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287
+              </p>
             </footer>
         </div>
       </div>
