@@ -15,8 +15,8 @@ const stylePresets = [
   { id: 'claymation', label: 'Claymation', description: 'A stop-motion, handcrafted look.' },
 ];
 
-const initialModelState: { meshDataUri: string | null; previewImageDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, previewImageDataUri: null, videoDataUri: null, error: null };
-const initialAnimationState: { meshDataUri: string | null; previewImageDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, previewImageDataUri: null, videoDataUri: null, error: null };
+const initialModelState: { meshDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, videoDataUri: null, error: null };
+const initialAnimationState: { meshDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, videoDataUri: null, error: null };
 
 export default function MainView() {
   const [modelState, modelAction, isModelPending] = useActionState(generateModelAction, initialModelState);
@@ -27,7 +27,6 @@ export default function MainView() {
   // When an animation is created, its state will include the original mesh and preview data.
   const displayState = {
     meshDataUri: animationState.meshDataUri || modelState.meshDataUri,
-    previewImageDataUri: animationState.previewImageDataUri || modelState.previewImageDataUri,
     videoDataUri: animationState.videoDataUri,
   }
 
@@ -62,7 +61,6 @@ export default function MainView() {
       <div className="lg:col-span-8 xl:col-span-9">
         <PreviewPanel 
             meshDataUri={displayState.meshDataUri}
-            previewImageDataUri={displayState.previewImageDataUri}
             videoDataUri={displayState.videoDataUri}
             isModelPending={isModelPending}
             isAnimationPending={isAnimationPending}

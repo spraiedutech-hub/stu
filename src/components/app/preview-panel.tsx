@@ -1,6 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import Image from 'next/image';
+import { Canvas, useLoader } from '@react-three/fiber';
+import { OrbitControls, Stage } from '@react-three/drei';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -8,10 +13,31 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Download, Film, LoaderCircle, Video } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
+import * as THREE from 'three';
+
+interface ModelProps {
+  meshDataUri: string;
+}
+
+const Model = ({ meshDataUri }: ModelProps) => {
+  const model = useLoader(OBJLoader, meshDataUri);
+
+  // Auto-center and scale the model
+  const box = new THREE.Box3().setFromObject(model);
+  const center = box.getCenter(new THREE.Vector3());
+  model.position.sub(center); // center the model
+  
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = 5 / maxDim;
+  model.scale.set(scale, scale, scale);
+
+  return <primitive object={model} />;
+};
+
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
-  previewImageDataUri: string | null;
   videoDataUri: string | null;
   isModelPending: boolean;
   isAnimationPending: boolean;
@@ -20,7 +46,6 @@ interface PreviewPanelProps {
 
 const PreviewPanel = ({ 
     meshDataUri, 
-    previewImageDataUri,
     videoDataUri, 
     isModelPending, 
     isAnimationPending,
@@ -83,19 +108,19 @@ const PreviewPanel = ({
           );
     }
     
-    if (meshDataUri && previewImageDataUri) {
+    if (meshDataUri) {
         return (
             <form action={animationAction} className="space-y-4">
               <input type="hidden" name="meshDataUri" value={meshDataUri} />
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
-                <video
-                    src={previewImageDataUri}
-                    className="w-full h-full object-contain"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                  />
+               <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-secondary/20 border-2 border-dashed">
+                <Suspense fallback={<LoaderCircle className="h-16 w-16 animate-spin text-primary m-auto" />}>
+                  <Canvas>
+                    <Stage environment="city" intensity={0.6}>
+                      <Model meshDataUri={meshDataUri} />
+                    </Stage>
+                    <OrbitControls />
+                  </Canvas>
+                </Suspense>
               </div>
 
               <div className="space-y-2">

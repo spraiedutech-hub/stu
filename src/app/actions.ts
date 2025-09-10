@@ -23,14 +23,12 @@ const AnimateModelSchema = z.object({
 
 interface GenerateModelState {
   meshDataUri: string | null;
-  previewImageDataUri: string | null;
   videoDataUri: string | null;
   error: string | null;
 }
 
 interface AnimateModelState {
     meshDataUri: string | null;
-    previewImageDataUri: string | null;
     videoDataUri: string | null;
     error: string | null;
 }
@@ -56,7 +54,6 @@ export async function generateModelAction(
     const errorMessage = fieldErrors.image?.[0] || fieldErrors.prompt?.[0] || fieldErrors.style?.[0] || 'Invalid input provided.';
     return {
       meshDataUri: null,
-      previewImageDataUri: null,
       videoDataUri: null,
       error: errorMessage,
     };
@@ -73,13 +70,12 @@ export async function generateModelAction(
       style,
     });
 
-    if (!result.meshDataUri || !result.previewImageDataUri) {
-      throw new Error('The 3D model or its preview could not be generated.');
+    if (!result.meshDataUri) {
+      throw new Error('The 3D model could not be generated.');
     }
 
     return {
       meshDataUri: result.meshDataUri,
-      previewImageDataUri: result.previewImageDataUri,
       videoDataUri: null,
       error: null,
     };
@@ -88,7 +84,6 @@ export async function generateModelAction(
     console.error(e);
     return {
       meshDataUri: null,
-      previewImageDataUri: null,
       videoDataUri: null,
       error: `Generation failed: ${errorMessage}`,
     };
