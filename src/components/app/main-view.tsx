@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useActionState } from 'react';
 import { generateAnimationAction } from '@/app/actions';
 import ControlPanel from './control-panel';
 import PreviewPanel from './preview-panel';
@@ -17,7 +16,7 @@ const animationPresets = [
 const initialState: { videoUri: string | null; error: string | null; } = { videoUri: null, error: null };
 
 export default function MainView() {
-  const [state, formAction] = useFormState(generateAnimationAction, initialState);
+  const [state, formAction] = useActionState(generateAnimationAction, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
