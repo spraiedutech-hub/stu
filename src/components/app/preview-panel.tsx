@@ -24,17 +24,17 @@ const PreviewPanel = ({ meshDataUri }: PreviewPanelProps) => {
     try {
       // For 3D models, we'll suggest a .obj extension
       if (meshDataUri.startsWith('data:model/obj')) {
-        link.download = `vismesh-model.obj`;
+        link.download = `spraivismeh-model.obj`;
       } else if (meshDataUri.startsWith('data:model/gltf+json')) {
-        link.download = `vismesh-model.gltf`;
+        link.download = `spraivismeh-model.gltf`;
       } else {
         const mimeType = meshDataUri.split(';')[0].split(':')[1];
         const extension = mimeType.split('/')[1] || 'dat';
-        link.download = `vismesh-output.${extension}`;
+        link.download = `spraivismeh-output.${extension}`;
       }
     } catch (error) {
       // Fallback for general data URIs
-      link.download = 'vismesh-output';
+      link.download = 'spraivismeh-output';
     }
 
     document.body.appendChild(link);

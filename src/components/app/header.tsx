@@ -8,7 +8,7 @@ const Header: FC = () => {
         <div className="flex items-center gap-3">
           <Cuboid className="h-7 w-7 text-primary" />
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            VisMesh
+            SPR AI VisMesh
           </h1>
         </div>
       </div>

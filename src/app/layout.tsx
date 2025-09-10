@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'VisMesh',
+  title: 'SPR AI VisMesh',
   description: 'Generate object-oriented 3D animations from your images.',
 };
 
