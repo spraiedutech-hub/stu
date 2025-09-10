@@ -58,9 +58,7 @@ const PreviewPanel = ({
   const renderContent = () => {
     if (isModelPending || isAnimationPending) {
       const title = isAnimationPending ? 'Animation in progress...' : 'Generation in progress...';
-      const description = isAnimationPending 
-        ? 'This can take up to a minute. Please be patient.'
-        : 'This may take a moment. Please wait.';
+      const description = 'This can take up to a minute. Please be patient.';
 
       return (
         <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed bg-secondary/50 p-8 text-center">
@@ -89,12 +87,14 @@ const PreviewPanel = ({
         return (
             <form action={animationAction} className="space-y-4">
               <input type="hidden" name="meshDataUri" value={meshDataUri} />
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                <Image
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
+                <video
                     src={previewImageDataUri}
-                    alt="Generated 3D model preview"
-                    fill
-                    className="object-contain"
+                    className="w-full h-full object-contain"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                   />
               </div>
 

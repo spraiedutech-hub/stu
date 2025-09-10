@@ -62,7 +62,7 @@ const generateAnimationFromMeshFlow = ai.defineFlow(
       model: googleAI.model('veo-2.0-generate-001'),
       prompt: [
         { text: prompt },
-        { media: { url: meshDataUri, contentType: 'model/obj' } },
+        { media: { url: meshDataUri } },
       ],
       config: {
         durationSeconds: 5,
