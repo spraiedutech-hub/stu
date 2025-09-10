@@ -6,11 +6,11 @@ import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { UploadCloud, Sparkles, LoaderCircle, Mic, MicOff, Camera, Video, AlertCircle } from 'lucide-react';
+import { UploadCloud, Sparkles, LoaderCircle, Mic, MicOff, Camera, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
 
 interface Preset {
@@ -290,23 +290,23 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
               </div>
           </div>
 
-          <div className="space-y-4">
-            <Label>Style Preset</Label>
-            <RadioGroup name="style" defaultValue={presets[0].id} className="space-y-1">
-              {presets.map((preset) => (
-                <Label
-                  key={preset.id}
-                  htmlFor={preset.id}
-                  className="flex cursor-pointer items-start space-x-3 rounded-md border p-4 transition-colors hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:bg-accent [&:has([data-state=checked])]:text-accent-foreground"
-                >
-                  <RadioGroupItem value={preset.id} id={preset.id} className="mt-0.5" />
-                  <div className="grid gap-1.5">
-                    <span className="font-semibold">{preset.label}</span>
-                    <span className="text-sm text-muted-foreground">{preset.description}</span>
-                  </div>
-                </Label>
-              ))}
-            </RadioGroup>
+          <div className="space-y-2">
+            <Label htmlFor="style-preset">Style Preset</Label>
+            <Select name="style" defaultValue={presets[0].id}>
+                <SelectTrigger id="style-preset">
+                    <SelectValue placeholder="Select a style" />
+                </SelectTrigger>
+                <SelectContent>
+                    {presets.map((preset) => (
+                        <SelectItem key={preset.id} value={preset.id}>
+                            <div className="flex flex-col">
+                                <span>{preset.label}</span>
+                                <span className="text-xs text-muted-foreground">{preset.description}</span>
+                            </div>
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
           </div>
         </CardContent>
         <CardFooter>
