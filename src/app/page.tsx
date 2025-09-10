@@ -8,8 +8,9 @@ export default function Home() {
       <main className="container mx-auto flex-1 px-4 py-8 md:px-6">
         <MainView />
       </main>
-      <footer className="py-4 text-center text-sm text-foreground/50">
-        Created by SPR AI Edutech
+      <footer className="space-y-1 py-6 text-center text-sm text-foreground/50">
+        <p>Created by SPR AI Edutech</p>
+        <p>Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287</p>
       </footer>
     </div>
   );
