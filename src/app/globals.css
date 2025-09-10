@@ -93,6 +93,16 @@ body {
     background-size: 400% 400%;
     animation: gradient 15s ease infinite;
   }
+
+  .animated-title .animated-letter {
+    display: inline-block;
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+
+  .animated-title:hover .animated-letter {
+    animation: wave 0.5s ease-in-out forwards;
+    color: hsl(var(--primary));
+  }
 }
 
 @keyframes gradient {
@@ -105,4 +115,13 @@ body {
 	100% {
 		background-position: 0% 50%;
 	}
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
