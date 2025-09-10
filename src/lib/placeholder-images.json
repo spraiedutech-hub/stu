@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "preview-placeholder",
+      "description": "A placeholder graphic for the animation preview area, showing abstract geometric shapes.",
+      "imageUrl": "https://picsum.photos/seed/vismesh/1280/720",
+      "imageHint": "abstract geometric"
+    }
+  ]
 }
