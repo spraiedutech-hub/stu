@@ -6,6 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Download, Film, LoaderCircle, Video } from 'lucide-react';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
@@ -90,6 +92,17 @@ const PreviewPanel = ({
                 <h3 className="mt-4 text-xl font-semibold tracking-tight">Model Complete!</h3>
                 <p className="mt-2 text-muted-foreground">Your 3D model is ready. You can now generate an animation.</p>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="animation-prompt">Animation Prompt</Label>
+                <Textarea
+                  id="animation-prompt"
+                  name="animation-prompt"
+                  placeholder="e.g., 'a smooth, 360-degree turntable animation', 'a bouncing animation', 'make it slowly crumble'"
+                  className="min-h-[80px]"
+                />
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <Button onClick={(e) => { e.preventDefault(); handleDownload(meshDataUri, 'spraivismeh-model.obj'); }} className="w-full sm:w-auto" variant="secondary">
                     <Download className="mr-2" />

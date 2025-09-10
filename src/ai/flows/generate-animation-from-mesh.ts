@@ -18,7 +18,10 @@ const GenerateAnimationFromMeshInputSchema = z.object({
     .describe(
       'The 3D mesh data as a data URI, typically in a format like OBJ or GLTF.'
     ),
-  prompt: z.string().describe('A text prompt to guide the animation.'),
+  prompt: z
+    .string()
+    .describe('A text prompt to guide the animation.')
+    .default('Create a smooth, 360-degree turntable animation of the provided 3D model.'),
 });
 export type GenerateAnimationFromMeshInput = z.infer<
   typeof GenerateAnimationFromMeshInputSchema

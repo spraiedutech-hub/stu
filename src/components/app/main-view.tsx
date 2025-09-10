@@ -12,6 +12,7 @@ const stylePresets = [
   { id: 'cartoonish', label: 'Cartoonish', description: 'Stylized, with exaggerated features.' },
   { id: 'low-poly', label: 'Low Poly', description: 'A minimalistic, geometric art style.' },
   { id: 'sculpture', label: 'Sculpture', description: 'Looks like a classical stone sculpture.' },
+  { id: 'claymation', label: 'Claymation', description: 'A stop-motion, handcrafted look.' },
 ];
 
 const initialModelState: { meshDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, videoDataUri: null, error: null };
