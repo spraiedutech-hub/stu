@@ -2,9 +2,8 @@
 
 import { useState, type FC, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +21,7 @@ interface Preset {
 
 interface ControlPanelProps {
   presets: Preset[];
+  isModelPending: boolean;
 }
 
 // Extend window type for SpeechRecognition
@@ -32,11 +32,10 @@ declare global {
   }
 }
 
-function SubmitButton({ imageSelected }: { imageSelected: boolean }) {
-  const { pending } = useFormStatus();
+function SubmitButton({ imageSelected, isPending }: { imageSelected: boolean, isPending: boolean }) {
   return (
-    <Button type="submit" className="w-full" disabled={pending || !imageSelected}>
-      {pending ? (
+    <Button type="submit" className="w-full" disabled={isPending || !imageSelected}>
+      {isPending ? (
         <>
           <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
           Generating...
@@ -51,7 +50,7 @@ function SubmitButton({ imageSelected }: { imageSelected: boolean }) {
   );
 }
 
-const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
+const ControlPanel: FC<ControlPanelProps> = ({ presets, isModelPending }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
@@ -214,15 +213,6 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4 flex flex-col items-center">
-              <Button variant="outline" size="sm" onClick={() => setIsCameraOpen(true)} className="w-full">
-                  <Camera className="mr-2" />
-                  Use Camera
-              </Button>
-            <div className="w-full flex items-center gap-2">
-                <Separator className="flex-1" />
-                <span className="text-xs text-muted-foreground">OR</span>
-                <Separator className="flex-1" />
-            </div>
             <div className="w-full">
               <label
                 htmlFor="image-upload"
@@ -254,12 +244,21 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
                 ref={fileInputRef}
               />
             </div>
+            <div className="w-full flex items-center gap-2">
+                <Separator className="flex-1" />
+                <span className="text-xs text-muted-foreground">OR</span>
+                <Separator className="flex-1" />
+            </div>
+            <Button variant="outline" size="sm" onClick={(e) => { e.preventDefault(); setIsCameraOpen(true); }} className="w-full">
+                <Camera className="mr-2" />
+                Use Camera
+            </Button>
           </div>
 
           <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="prompt">Custom Prompt (Optional)</Label>
-                <Button variant="ghost" size="icon" onClick={toggleListening} className="h-8 w-8">
+                <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); toggleListening(); }} className="h-8 w-8">
                   {isListening ? <MicOff className="text-destructive" /> : <Mic />}
                 </Button>
               </div>
@@ -277,7 +276,7 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
                       variant={language === 'en-US' ? 'secondary' : 'ghost'}
                       size="sm"
                       className="h-7 px-2"
-                      onClick={() => setLanguage('en-US')}
+                      onClick={(e) => { e.preventDefault(); setLanguage('en-US'); }}
                   >
                       EN
                   </Button>
@@ -285,7 +284,7 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
                       variant={language === 'kn-IN' ? 'secondary' : 'ghost'}
                       size="sm"
                       className="h-7 px-2"
-                      onClick={() => setLanguage('kn-IN')}
+                      onClick={(e) => { e.preventDefault(); setLanguage('kn-IN'); }}
                   >
                       KN
                   </Button>
@@ -312,7 +311,7 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
           </div>
         </CardContent>
         <CardFooter>
-          <SubmitButton imageSelected={!!imagePreview} />
+          <SubmitButton imageSelected={!!imagePreview} isPending={isModelPending}/>
         </CardFooter>
       </Card>
       <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>

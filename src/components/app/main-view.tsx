@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
-import { generateAnimationAction } from '@/app/actions';
+import { generateModelAction, createAnimationAction } from '@/app/actions';
 import ControlPanel from './control-panel';
 import PreviewPanel from './preview-panel';
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
 
 const stylePresets = [
   { id: 'realistic', label: 'Realistic', description: 'Aims for a photorealistic representation.' },
@@ -14,32 +14,48 @@ const stylePresets = [
   { id: 'sculpture', label: 'Sculpture', description: 'Looks like a classical stone sculpture.' },
 ];
 
-const initialState: { meshDataUri: string | null; error: string | null; } = { meshDataUri: null, error: null };
+const initialModelState: { meshDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, videoDataUri: null, error: null };
+const initialAnimationState: { meshDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, videoDataUri: null, error: null };
 
 export default function MainView() {
-  const [state, formAction] = useActionState(generateAnimationAction, initialState);
+  const [modelState, modelAction, isModelPending] = useActionState(generateModelAction, initialModelState);
+  const [animationState, animationAction, isAnimationPending] = useActionState(createAnimationAction, initialAnimationState);
   const { toast } = useToast();
 
+  // Combine states for the PreviewPanel
+  const displayState = {
+    meshDataUri: animationState.meshDataUri || modelState.meshDataUri,
+    videoDataUri: animationState.videoDataUri,
+  }
+
+  // Handle errors from both actions
   useEffect(() => {
-    if (state.error) {
-        toast({
-            variant: "destructive",
-            title: "Generation Error",
-            description: state.error,
-        });
+    const error = modelState.error || animationState.error;
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Generation Error",
+        description: error,
+      });
     }
-  }, [state.error, toast]);
+  }, [modelState.error, animationState.error, toast]);
 
   return (
-    <main className="container mx-auto flex-1 px-4 py-8 md:px-6">
-      <form action={formAction} className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        <div className="lg:col-span-4 xl:col-span-3">
-          <ControlPanel presets={stylePresets} />
-        </div>
-        <div className="lg:col-span-8 xl:col-span-9">
-          <PreviewPanel meshDataUri={state.meshDataUri} />
-        </div>
-      </form>
-    </main>
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div className="lg:col-span-4 xl:col-span-3">
+        <form action={modelAction}>
+            <ControlPanel presets={stylePresets} isModelPending={isModelPending} />
+        </form>
+      </div>
+      <div className="lg:col-span-8 xl:col-span-9">
+        <PreviewPanel 
+            meshDataUri={displayState.meshDataUri}
+            videoDataUri={displayState.videoDataUri}
+            isModelPending={isModelPending}
+            isAnimationPending={isAnimationPending}
+            animationAction={animationAction}
+        />
+      </div>
+    </div>
   );
 }

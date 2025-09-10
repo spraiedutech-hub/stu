@@ -5,7 +5,9 @@ export default function Home() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
-      <MainView />
+      <main className="container mx-auto flex-1 px-4 py-8 md:px-6">
+        <MainView />
+      </main>
     </div>
   );
 }

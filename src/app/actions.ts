@@ -1,9 +1,10 @@
 'use server';
 
 import { generate3DMeshFromImage } from '@/ai/flows/generate-3d-mesh-from-image';
+import { generateAnimationFromMesh } from '@/ai/flows/generate-animation-from-mesh';
 import { z } from 'zod';
 
-const FormSchema = z.object({
+const GenerateModelSchema = z.object({
   image: z
     .instanceof(File, { message: 'An image is required.' })
     .refine((file) => file.size > 0, 'An image is required.')
@@ -15,9 +16,20 @@ const FormSchema = z.object({
   style: z.string().min(1, 'A style must be selected.'),
 });
 
-interface FormState {
+const AnimateModelSchema = z.object({
+    meshDataUri: z.string().min(1, 'A 3D model is required to generate an animation.'),
+});
+
+interface GenerateModelState {
   meshDataUri: string | null;
+  videoDataUri: string | null;
   error: string | null;
+}
+
+interface AnimateModelState {
+    meshDataUri: string | null;
+    videoDataUri: string | null;
+    error: string | null;
 }
 
 async function fileToDataUri(file: File): Promise<string> {
@@ -26,11 +38,11 @@ async function fileToDataUri(file: File): Promise<string> {
   return `data:${file.type};base64,${buffer.toString('base64')}`;
 }
 
-export async function generateAnimationAction(
-  prevState: FormState,
+export async function generateModelAction(
+  prevState: GenerateModelState,
   formData: FormData
-): Promise<FormState> {
-  const validatedFields = FormSchema.safeParse({
+): Promise<GenerateModelState> {
+  const validatedFields = GenerateModelSchema.safeParse({
     image: formData.get('image'),
     prompt: formData.get('prompt'),
     style: formData.get('style'),
@@ -41,6 +53,7 @@ export async function generateAnimationAction(
     const errorMessage = fieldErrors.image?.[0] || fieldErrors.prompt?.[0] || fieldErrors.style?.[0] || 'Invalid input provided.';
     return {
       meshDataUri: null,
+      videoDataUri: null,
       error: errorMessage,
     };
   }
@@ -62,6 +75,7 @@ export async function generateAnimationAction(
 
     return {
       meshDataUri: result.meshDataUri,
+      videoDataUri: null,
       error: null,
     };
   } catch (e: unknown) {
@@ -69,7 +83,51 @@ export async function generateAnimationAction(
     console.error(e);
     return {
       meshDataUri: null,
+      videoDataUri: null,
       error: `Generation failed: ${errorMessage}`,
     };
   }
+}
+
+export async function createAnimationAction(
+    prevState: AnimateModelState,
+    formData: FormData
+): Promise<AnimateModelState> {
+    const validatedFields = AnimateModelSchema.safeParse({
+        meshDataUri: formData.get('meshDataUri'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            ...prevState,
+            error: 'A 3D model is required to generate an animation.',
+        };
+    }
+    
+    const { meshDataUri } = validatedFields.data;
+
+    try {
+        const result = await generateAnimationFromMesh({
+            meshDataUri: meshDataUri,
+            prompt: 'Create a smooth, 360-degree turntable animation of the provided 3D model.',
+        });
+
+        if (!result.videoDataUri) {
+            throw new Error('The animation could not be generated.');
+        }
+
+        return {
+            meshDataUri,
+            videoDataUri: result.videoDataUri,
+            error: null,
+        };
+    } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during animation generation.';
+        console.error(e);
+        return {
+            meshDataUri,
+            videoDataUri: null,
+            error: `Animation failed: ${errorMessage}`,
+        };
+    }
 }
