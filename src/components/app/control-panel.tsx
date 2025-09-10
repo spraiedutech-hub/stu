@@ -209,7 +209,6 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
     <>
       <Card className="sticky top-24">
         <CardHeader>
-          <CardTitle>Configuration</CardTitle>
           <CardDescription>Upload an image and guide the generation.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
