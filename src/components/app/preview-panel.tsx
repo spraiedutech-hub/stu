@@ -8,6 +8,8 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Download, Film, LoaderCircle, Video } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from 'react';
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
@@ -18,6 +20,13 @@ interface PreviewPanelProps {
   animationAction: (formData: FormData) => void;
 }
 
+const animationPresets = [
+    { id: 'turntable', label: 'Turntable', description: 'A smooth, 360-degree rotation.' },
+    { id: 'bounce', label: 'Bounce', description: 'A playful, bouncing animation.' },
+    { id: 'crumble', label: 'Crumble', description: 'The model slowly crumbles to dust.' },
+    { id: 'custom', label: 'Custom', description: 'Write your own animation prompt.' },
+  ];
+
 const PreviewPanel = ({ 
     meshDataUri, 
     previewImageUri,
@@ -26,6 +35,7 @@ const PreviewPanel = ({
     isAnimationPending,
     animationAction
 }: PreviewPanelProps) => {
+  const [animationStyle, setAnimationStyle] = useState(animationPresets[0].id);
   const placeholder = PlaceHolderImages.find(p => p.id === 'preview-placeholder');
 
   const handleDownload = (dataUri: string | null, defaultName: string) => {
@@ -98,14 +108,36 @@ const PreviewPanel = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="animation-prompt">Animation Prompt</Label>
-                <Textarea
-                  id="animation-prompt"
-                  name="animation-prompt"
-                  placeholder="e.g., 'a smooth, 360-degree turntable animation', 'a bouncing animation', 'make it slowly crumble'"
-                  className="min-h-[80px]"
-                />
+                <Label htmlFor="animation-style">Animation Style</Label>
+                <Select name="animationStyle" value={animationStyle} onValueChange={setAnimationStyle}>
+                    <SelectTrigger id="animation-style">
+                        <SelectValue placeholder="Select an animation style" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {animationPresets.map((preset) => (
+                            <SelectItem key={preset.id} value={preset.id}>
+                                <div className="flex flex-col">
+                                    <span>{preset.label}</span>
+                                    <span className="text-xs text-muted-foreground">{preset.description}</span>
+                                </div>
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
               </div>
+
+              {animationStyle === 'custom' && (
+                <div className="space-y-2">
+                  <Label htmlFor="animation-prompt">Custom Animation Prompt</Label>
+                  <Textarea
+                    id="animation-prompt"
+                    name="animation-prompt"
+                    placeholder="e.g., 'a slow-motion zoom-in', 'make it dance the salsa'"
+                    className="min-h-[80px]"
+                  />
+                </div>
+              )}
+
 
               <div className="flex flex-wrap gap-2">
                 <Button onClick={(e) => { e.preventDefault(); handleDownload(meshDataUri, 'spraivismeh-model.obj'); }} className="w-full sm:w-auto" variant="secondary">

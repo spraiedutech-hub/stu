@@ -18,10 +18,13 @@ const GenerateAnimationFromMeshInputSchema = z.object({
     .describe(
       'The 3D mesh data as a data URI, typically in a format like OBJ or GLTF.'
     ),
+  animationStyle: z
+    .string()
+    .describe('The style of animation to generate.'),
   prompt: z
     .string()
-    .describe('A text prompt to guide the animation.')
-    .default('Create a smooth, 360-degree turntable animation of the provided 3D model.'),
+    .describe('A custom text prompt to guide the animation, used if animationStyle is "custom".')
+    .optional(),
 });
 export type GenerateAnimationFromMeshInput = z.infer<
   typeof GenerateAnimationFromMeshInputSchema
@@ -57,11 +60,29 @@ const generateAnimationFromMeshFlow = ai.defineFlow(
     inputSchema: GenerateAnimationFromMeshInputSchema,
     outputSchema: GenerateAnimationFromMeshOutputSchema,
   },
-  async ({ meshDataUri, prompt }) => {
+  async ({ meshDataUri, animationStyle, prompt }) => {
+
+    let animationPrompt: string;
+    switch (animationStyle) {
+        case 'turntable':
+            animationPrompt = 'Create a smooth, 360-degree turntable animation of the provided 3D model.';
+            break;
+        case 'bounce':
+            animationPrompt = 'Create a playful bouncing animation for the provided 3D model.';
+            break;
+        case 'crumble':
+            animationPrompt = 'Animate the provided 3D model to look like it is slowly crumbling into dust.';
+            break;
+        case 'custom':
+        default:
+            animationPrompt = prompt || 'Create a smooth, 360-degree turntable animation of the provided 3D model.';
+            break;
+    }
+
     let { operation } = await ai.generate({
       model: googleAI.model('veo-2.0-generate-001'),
       prompt: [
-        { text: prompt },
+        { text: animationPrompt },
         { media: { url: meshDataUri } },
       ],
       config: {

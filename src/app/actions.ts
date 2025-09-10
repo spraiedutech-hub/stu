@@ -19,6 +19,7 @@ const GenerateModelSchema = z.object({
 const AnimateModelSchema = z.object({
     meshDataUri: z.string().min(1, 'A 3D model is required to generate an animation.'),
     previewImageUri: z.string().min(1, 'A preview image is required.'),
+    animationStyle: z.string().min(1, 'An animation style must be selected.'),
     prompt: z.string().optional(),
 });
 
@@ -103,22 +104,24 @@ export async function createAnimationAction(
     const validatedFields = AnimateModelSchema.safeParse({
         meshDataUri: formData.get('meshDataUri'),
         previewImageUri: formData.get('previewImageUri'),
+        animationStyle: formData.get('animationStyle'),
         prompt: formData.get('animation-prompt'),
     });
 
     if (!validatedFields.success) {
         return {
             ...prevState,
-            error: 'A 3D model is required to generate an animation.',
+            error: 'Invalid animation settings provided.',
         };
     }
     
-    const { meshDataUri, previewImageUri, prompt } = validatedFields.data;
+    const { meshDataUri, previewImageUri, animationStyle, prompt } = validatedFields.data;
 
     try {
         const result = await generateAnimationFromMesh({
             meshDataUri: meshDataUri,
-            prompt: prompt || 'Create a smooth, 360-degree turntable animation of the provided 3D model.',
+            animationStyle: animationStyle,
+            prompt: prompt,
         });
 
         if (!result.videoDataUri) {
