@@ -8,7 +8,7 @@
  */
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { generate3DMeshFromImage } from './generate-3d-mesh-from-image';
+import {googleAI} from '@genkit-ai/googleai';
 
 const GenerateObjectOrientedAnimationsInputSchema = z.object({
   imageUri: z
@@ -43,6 +43,15 @@ export async function generateObjectOrientedAnimations(
   return generateObjectOrientedAnimationsFlow(input);
 }
 
+
+const Generate3DMeshFromImageOutputSchema = z.object({
+  meshDataUri: z
+    .string()
+    .describe(
+      'The generated 3D mesh data as a data URI, typically in a format like OBJ or GLTF.'
+    ),
+});
+
 const generateObjectOrientedAnimationsFlow = ai.defineFlow(
   {
     name: 'generateObjectOrientedAnimationsFlow',
@@ -50,11 +59,25 @@ const generateObjectOrientedAnimationsFlow = ai.defineFlow(
     outputSchema: GenerateObjectOrientedAnimationsOutputSchema,
   },
   async ({imageUri, animationType}) => {
-    // Since we can't generate a video directly without a billing account,
-    // we'll generate a 3D mesh and return that as a data URI.
-    // The UI can then display this mesh.
-    const { meshDataUri } = await generate3DMeshFromImage({ photoDataUri: imageUri });
     
+    const {output} = await ai.generate({
+        model: googleAI.model('gemini-2.5-flash-image-preview'),
+        prompt: [
+          {media: {url: imageUri}},
+          {
+            text: `From the provided image, generate a basic 3D mesh model suitable as a base for animation. Return the 3D mesh data as a data URI. Make sure to include the appropriate mime type to specify the mesh type, e.g. data:model/obj;base64,... or data:model/gltf+json;base64,...`,
+          },
+        ],
+        output: {
+          schema: Generate3DMeshFromImageOutputSchema,
+        },
+        config: {
+          responseModalities: ['TEXT'],
+        },
+      });
+
+    const meshDataUri = output!.meshDataUri;
+
     // We can't generate a video, so we will return the mesh data URI
     // and let the client handle the visualization. For this example, we'll
     // return it in the `animationVideoUri` field, but a real app would have

@@ -63,7 +63,7 @@ export async function generateAnimationAction(
     };
   } catch (e: unknown) {
     const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during generation.';
-    console.error(errorMessage);
+    console.error(e);
     return {
       videoUri: null,
       error: `Generation failed: ${errorMessage}`,
