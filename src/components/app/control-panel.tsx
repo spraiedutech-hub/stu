@@ -213,8 +213,7 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="image-upload">Upload Image</Label>
+            <div className="flex items-center justify-end">
               <Button variant="outline" size="sm" onClick={() => setIsCameraOpen(true)}>
                 <Camera className="mr-2" />
                 Camera
