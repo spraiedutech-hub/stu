@@ -18,6 +18,7 @@ const Generate3DMeshFromImageInputSchema = z.object({
     .describe(
       "A photo to generate a 3D mesh from, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+    animationType: z.string().optional(), // Keep for compatibility, but it's not used
 });
 export type Generate3DMeshFromImageInput = z.infer<typeof Generate3DMeshFromImageInputSchema>;
 
@@ -52,13 +53,13 @@ const generate3DMeshFromImageFlow = ai.defineFlow(
         },
       ],
       output: {
-        schema: Generate3DMeshFromImageOutputSchema,
+        schema: z.object({ meshDataUri: z.string() }),
       },
       config: {
         responseModalities: ['TEXT'],
       },
     });
 
-    return output!;
+    return output! as Generate3DMeshFromImageOutput;
   }
 );

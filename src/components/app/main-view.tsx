@@ -13,7 +13,7 @@ const animationPresets = [
   { id: 'float', label: 'Float', description: 'The object drifts slowly in space.' },
 ];
 
-const initialState: { videoUri: string | null; error: string | null; } = { videoUri: null, error: null };
+const initialState: { meshDataUri: string | null; error: string | null; } = { meshDataUri: null, error: null };
 
 export default function MainView() {
   const [state, formAction] = useActionState(generateAnimationAction, initialState);
@@ -36,7 +36,7 @@ export default function MainView() {
           <ControlPanel presets={animationPresets} />
         </div>
         <div className="lg:col-span-8 xl:col-span-9">
-          <PreviewPanel videoUri={state.videoUri} />
+          <PreviewPanel meshDataUri={state.meshDataUri} />
         </div>
       </form>
     </main>

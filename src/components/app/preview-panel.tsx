@@ -9,26 +9,28 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Download, Film, LoaderCircle } from 'lucide-react';
 
 interface PreviewPanelProps {
-  videoUri: string | null;
+  meshDataUri: string | null;
 }
 
-const PreviewPanel = ({ videoUri }: PreviewPanelProps) => {
+const PreviewPanel = ({ meshDataUri }: PreviewPanelProps) => {
   const { pending } = useFormStatus();
   const placeholder = PlaceHolderImages.find(p => p.id === 'preview-placeholder');
 
   const handleDownload = () => {
-    if (!videoUri) return;
+    if (!meshDataUri) return;
     const link = document.createElement('a');
-    link.href = videoUri;
+    link.href = meshDataUri;
     
     try {
       // For 3D models, we'll suggest a .obj extension
-      if (videoUri.startsWith('data:model/obj')) {
+      if (meshDataUri.startsWith('data:model/obj')) {
         link.download = `vismesh-model.obj`;
+      } else if (meshDataUri.startsWith('data:model/gltf+json')) {
+        link.download = `vismesh-model.gltf`;
       } else {
-        const mimeType = videoUri.split(';')[0].split(':')[1];
-        const extension = mimeType.split('/')[1] || 'mp4';
-        link.download = `vismesh-animation.${extension}`;
+        const mimeType = meshDataUri.split(';')[0].split(':')[1];
+        const extension = mimeType.split('/')[1] || 'dat';
+        link.download = `vismesh-output.${extension}`;
       }
     } catch (error) {
       // Fallback for general data URIs
@@ -51,26 +53,7 @@ const PreviewPanel = ({ videoUri }: PreviewPanelProps) => {
       );
     }
 
-    if (videoUri) {
-        // Handle both video and 3D model data URIs
-      if (videoUri.startsWith('data:video')) {
-        return (
-          <div className="space-y-4">
-            <video
-              src={videoUri}
-              controls
-              autoPlay
-              loop
-              muted
-              className="aspect-video w-full rounded-lg bg-black"
-            />
-            <Button onClick={handleDownload} className="w-full sm:w-auto" variant="outline">
-              <Download className="mr-2" />
-              Download Animation
-            </Button>
-          </div>
-        );
-      }
+    if (meshDataUri) {
       // A simple display for the 3D mesh data as text
       return (
         <div className="space-y-4">
@@ -78,7 +61,7 @@ const PreviewPanel = ({ videoUri }: PreviewPanelProps) => {
                 <h3 className="text-lg font-semibold">Generated 3D Mesh Data</h3>
                 <p className="text-sm text-muted-foreground mb-2">A 3D viewer would be needed to display this model. You can download the data below.</p>
                 <div className="w-full h-48 overflow-y-auto bg-background p-2 rounded-md border text-xs">
-                    <pre><code>{videoUri.substring(0, 500)}...</code></pre>
+                    <pre><code>{meshDataUri.substring(0, 500)}...</code></pre>
                 </div>
             </div>
           <Button onClick={handleDownload} className="w-full sm:w-auto" variant="outline">
@@ -101,7 +84,7 @@ const PreviewPanel = ({ videoUri }: PreviewPanelProps) => {
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 p-8 text-center">
             <Film className="h-16 w-16 text-white/80" />
-            <h3 className="mt-4 text-xl font-semibold tracking-tight text-white">Your animation will appear here</h3>
+            <h3 className="mt-4 text-xl font-semibold tracking-tight text-white">Your 3D model will appear here</h3>
             <p className="mt-2 text-white/70">Upload an image and choose a preset to get started.</p>
           </div>
         </div>

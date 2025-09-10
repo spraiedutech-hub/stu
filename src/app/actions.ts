@@ -1,6 +1,6 @@
 'use server';
 
-import { generateObjectOrientedAnimations } from '@/ai/flows/generate-object-oriented-animations';
+import { generate3DMeshFromImage } from '@/ai/flows/generate-3d-mesh-from-image';
 import { z } from 'zod';
 
 const FormSchema = z.object({
@@ -15,7 +15,7 @@ const FormSchema = z.object({
 });
 
 interface FormState {
-  videoUri: string | null;
+  meshDataUri: string | null;
   error: string | null;
 }
 
@@ -38,7 +38,7 @@ export async function generateAnimationAction(
     const fieldErrors = validatedFields.error.flatten().fieldErrors;
     const errorMessage = fieldErrors.image?.[0] || fieldErrors.animationType?.[0] || 'Invalid input provided.';
     return {
-      videoUri: null,
+      meshDataUri: null,
       error: errorMessage,
     };
   }
@@ -48,24 +48,24 @@ export async function generateAnimationAction(
   try {
     const imageUri = await fileToDataUri(image);
     
-    const animationResult = await generateObjectOrientedAnimations({
-      imageUri,
-      animationType,
+    const result = await generate3DMeshFromImage({
+      photoDataUri: imageUri,
+      animationType, // Pass for compatibility, though not used in the new flow
     });
 
-    if (!animationResult.animationVideoUri) {
-      throw new Error('The animation could not be generated.');
+    if (!result.meshDataUri) {
+      throw new Error('The 3D mesh could not be generated.');
     }
 
     return {
-      videoUri: animationResult.animationVideoUri,
+      meshDataUri: result.meshDataUri,
       error: null,
     };
   } catch (e: unknown) {
     const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during generation.';
     console.error(e);
     return {
-      videoUri: null,
+      meshDataUri: null,
       error: `Generation failed: ${errorMessage}`,
     };
   }
