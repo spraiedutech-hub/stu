@@ -11,6 +11,7 @@ import { Textarea } from '../ui/textarea';
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
+  previewImageDataUri: string | null;
   videoDataUri: string | null;
   isModelPending: boolean;
   isAnimationPending: boolean;
@@ -19,6 +20,7 @@ interface PreviewPanelProps {
 
 const PreviewPanel = ({ 
     meshDataUri, 
+    previewImageDataUri,
     videoDataUri, 
     isModelPending, 
     isAnimationPending,
@@ -83,14 +85,17 @@ const PreviewPanel = ({
           );
     }
     
-    if (meshDataUri) {
+    if (meshDataUri && previewImageDataUri) {
         return (
             <form action={animationAction} className="space-y-4">
               <input type="hidden" name="meshDataUri" value={meshDataUri} />
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-secondary/50 flex flex-col items-center justify-center p-8 text-center">
-                <Film className="h-16 w-16 text-primary" />
-                <h3 className="mt-4 text-xl font-semibold tracking-tight">Model Complete!</h3>
-                <p className="mt-2 text-muted-foreground">Your 3D model is ready. You can now generate an animation.</p>
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                <Image
+                    src={previewImageDataUri}
+                    alt="Generated 3D model preview"
+                    fill
+                    className="object-contain"
+                  />
               </div>
 
               <div className="space-y-2">

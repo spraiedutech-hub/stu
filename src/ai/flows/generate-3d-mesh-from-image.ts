@@ -29,6 +29,9 @@ const Generate3DMeshFromImageOutputSchema = z.object({
     .describe(
       'The generated 3D mesh data as a data URI, typically in a format like OBJ or GLTF.'
     ),
+  previewImageDataUri: z
+    .string()
+    .describe('A data URI of a preview image of the generated 3D mesh.'),
 });
 export type Generate3DMeshFromImageOutput = z.infer<typeof Generate3DMeshFromImageOutputSchema>;
 
@@ -53,11 +56,19 @@ const generate3DMeshFromImageFlow = ai.defineFlow(
           text: `From the provided image, generate a basic 3D mesh model suitable as a base for animation. 
 Use the following prompt to guide the generation: "${prompt}".
 Apply the following style: "${style}".
-Return the 3D mesh data as a data URI. Make sure to include the appropriate mime type to specify the mesh type, e.g. data:model/obj;base64,... or data:model/gltf+json;base64,...`,
+
+After generating the mesh, create a high-quality 2D preview image of the resulting 3D model from an interesting angle.
+
+Return both the 3D mesh data as a data URI and the preview image as a data URI. 
+Make sure to include the appropriate mime type for the mesh, e.g. data:model/obj;base64,... or data:model/gltf+json;base64,...
+The image should be a standard image mime type, e.g., data:image/png;base64,...`,
         },
       ],
       output: {
-        schema: z.object({ meshDataUri: z.string() }),
+        schema: z.object({ 
+            meshDataUri: z.string(),
+            previewImageDataUri: z.string(),
+        }),
       },
       config: {
         responseModalities: ['TEXT'],

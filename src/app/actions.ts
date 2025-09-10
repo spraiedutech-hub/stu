@@ -23,12 +23,14 @@ const AnimateModelSchema = z.object({
 
 interface GenerateModelState {
   meshDataUri: string | null;
+  previewImageDataUri: string | null;
   videoDataUri: string | null;
   error: string | null;
 }
 
 interface AnimateModelState {
     meshDataUri: string | null;
+    previewImageDataUri: string | null;
     videoDataUri: string | null;
     error: string | null;
 }
@@ -54,6 +56,7 @@ export async function generateModelAction(
     const errorMessage = fieldErrors.image?.[0] || fieldErrors.prompt?.[0] || fieldErrors.style?.[0] || 'Invalid input provided.';
     return {
       meshDataUri: null,
+      previewImageDataUri: null,
       videoDataUri: null,
       error: errorMessage,
     };
@@ -70,12 +73,13 @@ export async function generateModelAction(
       style,
     });
 
-    if (!result.meshDataUri) {
-      throw new Error('The 3D mesh could not be generated.');
+    if (!result.meshDataUri || !result.previewImageDataUri) {
+      throw new Error('The 3D model or its preview could not be generated.');
     }
 
     return {
       meshDataUri: result.meshDataUri,
+      previewImageDataUri: result.previewImageDataUri,
       videoDataUri: null,
       error: null,
     };
@@ -84,6 +88,7 @@ export async function generateModelAction(
     console.error(e);
     return {
       meshDataUri: null,
+      previewImageDataUri: null,
       videoDataUri: null,
       error: `Generation failed: ${errorMessage}`,
     };
@@ -119,7 +124,7 @@ export async function createAnimationAction(
         }
 
         return {
-            meshDataUri,
+            ...prevState,
             videoDataUri: result.videoDataUri,
             error: null,
         };
@@ -127,7 +132,7 @@ export async function createAnimationAction(
         const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during animation generation.';
         console.error(e);
         return {
-            meshDataUri,
+            ...prevState,
             videoDataUri: null,
             error: `Animation failed: ${errorMessage}`,
         };
