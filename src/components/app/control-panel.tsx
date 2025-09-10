@@ -103,7 +103,9 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets, isModelPending }) => {
       };
 
       recognition.onend = () => {
-        setIsListening(false);
+        if (isListening) {
+          setIsListening(false);
+        }
       };
       
       recognitionRef.current = recognition;
@@ -114,7 +116,11 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets, isModelPending }) => {
             description: "Your browser does not support voice input.",
         });
     }
-  }, [language, toast]);
+
+    return () => {
+        recognitionRef.current?.abort();
+    }
+  }, [language, toast, isListening]);
 
   useEffect(() => {
     if (isCameraOpen) {
