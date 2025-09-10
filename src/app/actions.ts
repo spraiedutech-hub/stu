@@ -1,6 +1,5 @@
 'use server';
 
-import { generate3DMeshFromImage } from '@/ai/flows/generate-3d-mesh-from-image';
 import { generateObjectOrientedAnimations } from '@/ai/flows/generate-object-oriented-animations';
 import { z } from 'zod';
 

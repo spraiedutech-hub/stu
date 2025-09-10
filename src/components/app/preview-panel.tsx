@@ -22,11 +22,17 @@ const PreviewPanel = ({ videoUri }: PreviewPanelProps) => {
     link.href = videoUri;
     
     try {
-      const mimeType = videoUri.split(';')[0].split(':')[1];
-      const extension = mimeType.split('/')[1] || 'mp4';
-      link.download = `vismesh-animation.${extension}`;
+      // For 3D models, we'll suggest a .obj extension
+      if (videoUri.startsWith('data:model/obj')) {
+        link.download = `vismesh-model.obj`;
+      } else {
+        const mimeType = videoUri.split(';')[0].split(':')[1];
+        const extension = mimeType.split('/')[1] || 'mp4';
+        link.download = `vismesh-animation.${extension}`;
+      }
     } catch (error) {
-      link.download = 'vismesh-animation.mp4';
+      // Fallback for general data URIs
+      link.download = 'vismesh-output';
     }
 
     document.body.appendChild(link);
@@ -39,26 +45,45 @@ const PreviewPanel = ({ videoUri }: PreviewPanelProps) => {
       return (
         <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed bg-secondary/50 p-8 text-center">
             <LoaderCircle className="h-16 w-16 animate-spin text-primary" />
-            <h3 className="text-xl font-semibold tracking-tight">Animation in progress...</h3>
+            <h3 className="text-xl font-semibold tracking-tight">Generation in progress...</h3>
             <p className="text-muted-foreground">This may take a moment. Please wait.</p>
         </div>
       );
     }
 
     if (videoUri) {
+        // Handle both video and 3D model data URIs
+      if (videoUri.startsWith('data:video')) {
+        return (
+          <div className="space-y-4">
+            <video
+              src={videoUri}
+              controls
+              autoPlay
+              loop
+              muted
+              className="aspect-video w-full rounded-lg bg-black"
+            />
+            <Button onClick={handleDownload} className="w-full sm:w-auto" variant="outline">
+              <Download className="mr-2" />
+              Download Animation
+            </Button>
+          </div>
+        );
+      }
+      // A simple display for the 3D mesh data as text
       return (
         <div className="space-y-4">
-          <video
-            src={videoUri}
-            controls
-            autoPlay
-            loop
-            muted
-            className="aspect-video w-full rounded-lg bg-black"
-          />
+            <div className="aspect-video w-full rounded-lg bg-secondary/50 p-4">
+                <h3 className="text-lg font-semibold">Generated 3D Mesh Data</h3>
+                <p className="text-sm text-muted-foreground mb-2">A 3D viewer would be needed to display this model. You can download the data below.</p>
+                <div className="w-full h-48 overflow-y-auto bg-background p-2 rounded-md border text-xs">
+                    <pre><code>{videoUri.substring(0, 500)}...</code></pre>
+                </div>
+            </div>
           <Button onClick={handleDownload} className="w-full sm:w-auto" variant="outline">
             <Download className="mr-2" />
-            Download Animation
+            Download Model
           </Button>
         </div>
       );

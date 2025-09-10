@@ -9,8 +9,7 @@
 import {ai} from '@/ai/genkit';
 import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
-import * as fs from 'fs';
-import {Readable} from 'stream';
+import { generate3DMeshFromImage } from './generate-3d-mesh-from-image';
 
 const GenerateObjectOrientedAnimationsInputSchema = z.object({
   imageUri: z
@@ -52,62 +51,18 @@ const generateObjectOrientedAnimationsFlow = ai.defineFlow(
     outputSchema: GenerateObjectOrientedAnimationsOutputSchema,
   },
   async ({imageUri, animationType}) => {
-    let {operation} = await ai.generate({
-      model: googleAI.model('veo-2.0-generate-001'),
-      prompt: [
-        {
-          text: `Generate a video of the object in the image with a ${animationType} animation.`,
-        },
-        {
-          media: {
-            url: imageUri,
-          },
-        },
-      ],
-      config: {
-        durationSeconds: 5,
-        aspectRatio: '16:9',
-      },
-    });
-
-    if (!operation) {
-      throw new Error('Expected the model to return an operation');
-    }
-
-    while (!operation.done) {
-      operation = await ai.checkOperation(operation);
-      // Sleep for 5 seconds before checking again.
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    }
-
-    if (operation.error) {
-      throw new Error('failed to generate video: ' + operation.error.message);
-    }
-
-    const video = operation.output?.message?.content.find(p => !!p.media);
-    if (!video || !video.media) {
-      throw new Error('Failed to find the generated video');
-    }
-
-    const fetch = (await import('node-fetch')).default;
-    const videoDownloadResponse = await fetch(
-      `${video.media.url}&key=${process.env.GEMINI_API_KEY}`
-    );
-    if (
-      !videoDownloadResponse ||
-      videoDownloadResponse.status !== 200 ||
-      !videoDownloadResponse.body
-    ) {
-      throw new Error('Failed to fetch video');
-    }
-
-    const videoBuffer = await videoDownloadResponse.arrayBuffer();
-
+    // Since we can't generate a video directly without a billing account,
+    // we'll generate a 3D mesh and return that as a data URI.
+    // The UI can then display this mesh.
+    const { meshDataUri } = await generate3DMeshFromImage({ photoDataUri: imageUri });
+    
+    // We can't generate a video, so we will return the mesh data URI
+    // and let the client handle the visualization. For this example, we'll
+    // return it in the `animationVideoUri` field, but a real app would have
+    // a dedicated field for 3D model data.
     return {
-      animationVideoUri: `data:video/mp4;base64,${Buffer.from(
-        videoBuffer
-      ).toString('base64')}`,
-      description: `A video of the object with a ${animationType} animation.`,
+      animationVideoUri: meshDataUri,
+      description: `A 3D mesh representation of the object for a "${animationType}" animation.`,
     };
   }
 );
