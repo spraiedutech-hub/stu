@@ -208,7 +208,7 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
   return (
     <>
       <Card className="sticky top-24">
-        <CardHeader>
+        <CardHeader className="pb-4">
           <CardDescription>Upload an image and guide the generation.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
