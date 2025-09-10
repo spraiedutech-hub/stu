@@ -50,7 +50,7 @@ const generate3DMeshFromImageFlow = ai.defineFlow(
   async ({photoDataUri, prompt, style}) => {
     const llmResponse = await ai.generate({
       prompt: `From the provided image, generate a basic 3D mesh model suitable as a base for animation. 
-Also, create a preview image of the generated model.
+Also, create a clean, high-quality preview image of the generated model from a good angle.
 Use the following prompt to guide the generation: "${prompt}".
 Apply the following style: "${style}".
 

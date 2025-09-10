@@ -9,7 +9,7 @@ import { Download, Film, LoaderCircle, Video } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState } from 'react';
+import { useState, useRef, MouseEvent } from 'react';
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
@@ -26,6 +26,43 @@ const animationPresets = [
     { id: 'crumble', label: 'Crumble', description: 'The model slowly crumbles to dust.' },
     { id: 'custom', label: 'Custom', description: 'Write your own animation prompt.' },
   ];
+
+const ReactiveImage = ({ src, alt }: { src: string; alt: string }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+        if (!containerRef.current) return;
+        const { left, top, width, height } = containerRef.current.getBoundingClientRect();
+        const x = (e.clientX - left) / width - 0.5;
+        const y = (e.clientY - top) / height - 0.5;
+
+        const rotateY = x * 20; // Max rotation 10 degrees
+        const rotateX = -y * 20; // Max rotation 10 degrees
+        
+        containerRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+    };
+
+    const handleMouseLeave = () => {
+        if (!containerRef.current) return;
+        containerRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    };
+
+    return (
+        <div 
+            ref={containerRef}
+            className="relative aspect-video w-full overflow-hidden rounded-lg bg-secondary/20 border-2 border-dashed transition-transform duration-200 ease-out"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+        >
+            <Image
+                src={src}
+                alt={alt}
+                fill
+                className="object-contain"
+            />
+        </div>
+    );
+};
 
 const PreviewPanel = ({ 
     meshDataUri, 
@@ -98,14 +135,10 @@ const PreviewPanel = ({
             <form action={animationAction} className="space-y-4">
               <input type="hidden" name="meshDataUri" value={meshDataUri} />
               <input type="hidden" name="previewImageUri" value={previewImageUri} />
-               <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-secondary/20 border-2 border-dashed">
-                <Image
+               <ReactiveImage
                     src={previewImageUri}
                     alt="Preview of generated 3D model"
-                    fill
-                    className="object-contain"
                 />
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="animation-style">Animation Style</Label>
