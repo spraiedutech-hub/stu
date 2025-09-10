@@ -57,7 +57,7 @@ Apply the following style: "${style}".
 Return only the 3D mesh data (as a downloadable 'model/obj' part) and a single preview image (as a downloadable 'image/png' part).
 Do not return text.`,
       model: googleAI.model('gemini-2.5-flash-image-preview'),
-      config: { responseModalities: ['TEXT', 'IMAGE', 'DOWNLOADABLE'] },
+      config: { responseModalities: ['TEXT', 'IMAGE'] },
       input: [
         {
           media: {
