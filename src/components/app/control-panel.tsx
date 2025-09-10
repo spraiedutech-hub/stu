@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
 import { UploadCloud, Sparkles, LoaderCircle } from 'lucide-react';
 
 interface Preset {
@@ -31,7 +32,7 @@ function SubmitButton({ imageSelected }: { imageSelected: boolean }) {
       ) : (
         <>
           <Sparkles className="mr-2 h-4 w-4" />
-          Generate Animation
+          Generate Model
         </>
       )}
     </Button>
@@ -58,7 +59,7 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
     <Card className="sticky top-24">
       <CardHeader>
         <CardTitle>Configuration</CardTitle>
-        <CardDescription>Upload an image and select an animation style.</CardDescription>
+        <CardDescription>Upload an image and guide the generation.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
@@ -95,9 +96,19 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
           </div>
         </div>
 
+        <div className="space-y-2">
+            <Label htmlFor="prompt">Custom Prompt (Optional)</Label>
+            <Textarea
+            id="prompt"
+            name="prompt"
+            placeholder="e.g., 'a futuristic version of the object', 'make it look like it is made of wood'"
+            className="min-h-[80px]"
+            />
+        </div>
+
         <div className="space-y-4">
-          <Label>Animation Preset</Label>
-          <RadioGroup name="animationType" defaultValue={presets[0].id} className="space-y-1">
+          <Label>Style Preset</Label>
+          <RadioGroup name="style" defaultValue={presets[0].id} className="space-y-1">
             {presets.map((preset) => (
               <Label
                 key={preset.id}

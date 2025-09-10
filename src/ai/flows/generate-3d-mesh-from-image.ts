@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Generates a basic 3D mesh model from an uploaded image.
+ * @fileOverview Generates a basic 3D mesh model from an uploaded image and a text prompt.
  *
  * - generate3DMeshFromImage - A function that handles the generation of 3D mesh from an image.
  * - Generate3DMeshFromImageInput - The input type for the generate3DMeshFromImage function.
@@ -18,7 +18,8 @@ const Generate3DMeshFromImageInputSchema = z.object({
     .describe(
       "A photo to generate a 3D mesh from, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
-    animationType: z.string().optional(), // Keep for compatibility, but it's not used
+  prompt: z.string().describe('A custom text prompt to guide the mesh generation.'),
+  style: z.string().describe('A style preset for the generation.'),
 });
 export type Generate3DMeshFromImageInput = z.infer<typeof Generate3DMeshFromImageInputSchema>;
 
@@ -43,13 +44,16 @@ const generate3DMeshFromImageFlow = ai.defineFlow(
     inputSchema: Generate3DMeshFromImageInputSchema,
     outputSchema: Generate3DMeshFromImageOutputSchema,
   },
-  async ({photoDataUri}) => {
+  async ({photoDataUri, prompt, style}) => {
     const {output} = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-image-preview'),
       prompt: [
         {media: {url: photoDataUri}},
         {
-          text: 'From the provided image, generate a basic 3D mesh model suitable as a base for animation. Return the 3D mesh data as a data URI. Make sure to include the appropriate mime type to specify the mesh type, e.g. data:model/obj;base64,... or data:model/gltf+json;base64,...',
+          text: `From the provided image, generate a basic 3D mesh model suitable as a base for animation. 
+Use the following prompt to guide the generation: "${prompt}".
+Apply the following style: "${style}".
+Return the 3D mesh data as a data URI. Make sure to include the appropriate mime type to specify the mesh type, e.g. data:model/obj;base64,... or data:model/gltf+json;base64,...`,
         },
       ],
       output: {

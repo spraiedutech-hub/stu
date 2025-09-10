@@ -11,7 +11,8 @@ const FormSchema = z.object({
       (file) => file.type.startsWith('image/'),
       'Only image files are allowed.'
     ),
-  animationType: z.string().min(1, 'An animation type must be selected.'),
+  prompt: z.string().optional(),
+  style: z.string().min(1, 'A style must be selected.'),
 });
 
 interface FormState {
@@ -31,26 +32,28 @@ export async function generateAnimationAction(
 ): Promise<FormState> {
   const validatedFields = FormSchema.safeParse({
     image: formData.get('image'),
-    animationType: formData.get('animationType'),
+    prompt: formData.get('prompt'),
+    style: formData.get('style'),
   });
 
   if (!validatedFields.success) {
     const fieldErrors = validatedFields.error.flatten().fieldErrors;
-    const errorMessage = fieldErrors.image?.[0] || fieldErrors.animationType?.[0] || 'Invalid input provided.';
+    const errorMessage = fieldErrors.image?.[0] || fieldErrors.prompt?.[0] || fieldErrors.style?.[0] || 'Invalid input provided.';
     return {
       meshDataUri: null,
       error: errorMessage,
     };
   }
 
-  const { image, animationType } = validatedFields.data;
+  const { image, prompt, style } = validatedFields.data;
 
   try {
     const imageUri = await fileToDataUri(image);
     
     const result = await generate3DMeshFromImage({
       photoDataUri: imageUri,
-      animationType, // Pass for compatibility, though not used in the new flow
+      prompt: prompt || 'A standard 3D model of the object in the image.',
+      style,
     });
 
     if (!result.meshDataUri) {
