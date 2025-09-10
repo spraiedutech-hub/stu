@@ -103,7 +103,7 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets, isModelPending }) => {
       };
 
       recognition.onend = () => {
-        if (isListening) {
+        if (recognitionRef.current) { // Check if it's still mounted
           setIsListening(false);
         }
       };
@@ -119,8 +119,9 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets, isModelPending }) => {
 
     return () => {
         recognitionRef.current?.abort();
+        recognitionRef.current = null;
     }
-  }, [language, toast, isListening]);
+  }, [language, toast]);
 
   useEffect(() => {
     if (isCameraOpen) {
@@ -206,8 +207,16 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets, isModelPending }) => {
       recognitionRef.current?.stop();
       setIsListening(false);
     } else {
-      recognitionRef.current?.start();
-      setIsListening(true);
+      if (recognitionRef.current) {
+        try {
+            recognitionRef.current.start();
+            setIsListening(true);
+        } catch (error) {
+            // This can happen if start() is called again before it has fully stopped.
+            console.error("Speech recognition start error:", error);
+            setIsListening(false);
+        }
+      }
     }
   };
 
