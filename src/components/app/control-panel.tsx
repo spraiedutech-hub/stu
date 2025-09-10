@@ -22,6 +22,10 @@ interface Preset {
 interface ControlPanelProps {
   presets: Preset[];
   isModelPending: boolean;
+  imagePreview: string | null;
+  setImagePreview: (value: string | null) => void;
+  imageFile: File | null;
+  setImageFile: (value: File | null) => void;
 }
 
 // Extend window type for SpeechRecognition
@@ -50,9 +54,14 @@ function SubmitButton({ imageSelected, isPending }: { imageSelected: boolean, is
   );
 }
 
-const ControlPanel: FC<ControlPanelProps> = ({ presets, isModelPending }) => {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+const ControlPanel: FC<ControlPanelProps> = ({ 
+    presets, 
+    isModelPending,
+    imagePreview,
+    setImagePreview,
+    imageFile,
+    setImageFile
+}) => {
   const [prompt, setPrompt] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [language, setLanguage] = useState('en-US'); // 'en-US' for English, 'kn-IN' for Kannada
@@ -199,6 +208,7 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets, isModelPending }) => {
   
   useEffect(() => {
     updateFileInput();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageFile]);
 
 

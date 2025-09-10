@@ -5,11 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Download, Film, LoaderCircle, Video } from 'lucide-react';
+import { Download, Film, LoaderCircle, Video, Sparkles } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useRef, MouseEvent } from 'react';
+import { cn } from '@/lib/utils';
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
@@ -18,6 +19,7 @@ interface PreviewPanelProps {
   isModelPending: boolean;
   isAnimationPending: boolean;
   animationAction: (formData: FormData) => void;
+  inputImagePreview: string | null;
 }
 
 const animationPresets = [
@@ -33,7 +35,7 @@ const ReactiveImage = ({ src, alt }: { src: string; alt: string }) => {
 
     const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
         if (!containerRef.current) return;
-        const { left, top, width, height } = containerRef.current.getBoundingClientRect();
+        const { left, top, width, height } = containerref.current.getboundingclientrect();
         const x = (e.clientX - left) / width - 0.5;
         const y = (e.clientY - top) / height - 0.5;
 
@@ -71,7 +73,8 @@ const PreviewPanel = ({
     videoDataUri, 
     isModelPending, 
     isAnimationPending,
-    animationAction
+    animationAction,
+    inputImagePreview
 }: PreviewPanelProps) => {
   const [animationStyle, setAnimationStyle] = useState(animationPresets[0].id);
   const placeholder = PlaceHolderImages.find(p => p.id === 'preview-placeholder');
@@ -104,6 +107,35 @@ const PreviewPanel = ({
   };
 
   const renderContent = () => {
+    if (isModelPending && inputImagePreview) {
+        return (
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg border-2 border-dashed bg-secondary/50">
+                <Image
+                    src={inputImagePreview}
+                    alt="Image being processed"
+                    fill
+                    className="object-cover"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/60 p-8 text-center">
+                    <div className="relative">
+                        <Sparkles className="h-16 w-16 text-primary animate-pulse" />
+                    </div>
+                    <h3 className="text-xl font-semibold tracking-tight text-white animated-title">
+                        {'SPR AI Bringing life...'.split('').map((letter, index) => (
+                            <span
+                                key={index}
+                                className="animated-letter"
+                                style={{ animationDelay: `${index * 0.05}s` }}
+                            >
+                                {letter === ' ' ? '\u00A0' : letter}
+                            </span>
+                        ))}
+                    </h3>
+                </div>
+            </div>
+        );
+    }
+    
     if (isModelPending || isAnimationPending) {
       const title = isAnimationPending ? 'Animation in progress...' : 'Generation in progress...';
       const description = 'This can take up to a minute. Please be patient.';

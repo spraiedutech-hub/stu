@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
 import { generateModelAction, createAnimationAction } from '@/app/actions';
 import ControlPanel from './control-panel';
@@ -38,6 +38,9 @@ export default function MainView() {
   const [modelState, modelAction, isModelPending] = useActionState(generateModelAction, initialModelState);
   const [animationState, animationAction, isAnimationPending] = useActionState(createAnimationAction, initialAnimationState);
   const { toast } = useToast();
+  
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const displayState = {
     meshDataUri: animationState.meshDataUri || modelState.meshDataUri,
@@ -56,6 +59,15 @@ export default function MainView() {
     }
   }, [modelState.error, animationState.error, toast]);
 
+  // When a model is successfully generated, clear the initial image preview
+  useEffect(() => {
+    if (modelState.meshDataUri) {
+        setImagePreview(null);
+        setImageFile(null);
+    }
+  }, [modelState.meshDataUri]);
+
+
   const animationActionWithState = (formData: FormData) => {
     if (displayState.meshDataUri) {
       formData.set('meshDataUri', displayState.meshDataUri);
@@ -70,7 +82,14 @@ export default function MainView() {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
       <div className="lg:col-span-4 xl:col-span-3">
         <form action={modelAction}>
-            <ControlPanel presets={stylePresets} isModelPending={isModelPending} />
+            <ControlPanel
+                presets={stylePresets} 
+                isModelPending={isModelPending}
+                imagePreview={imagePreview}
+                setImagePreview={setImagePreview}
+                imageFile={imageFile}
+                setImageFile={setImageFile}
+            />
         </form>
       </div>
       <div className="lg:col-span-8 xl:col-span-9">
@@ -83,6 +102,7 @@ export default function MainView() {
                     isModelPending={isModelPending}
                     isAnimationPending={isAnimationPending}
                     animationAction={animationActionWithState}
+                    inputImagePreview={imagePreview}
                 />
             </div>
             <footer className="w-full py-4 text-center text-sm text-foreground/50">
