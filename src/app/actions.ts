@@ -48,18 +48,9 @@ export async function generateAnimationAction(
 
   try {
     const imageUri = await fileToDataUri(image);
-
-    const meshResult = await generate3DMeshFromImage({
-      photoDataUri: imageUri,
-    });
-
-    if (!meshResult.meshDataUri) {
-        throw new Error('The 3D mesh could not be generated from the image.');
-    }
     
     const animationResult = await generateObjectOrientedAnimations({
       imageUri,
-      meshData: meshResult.meshDataUri,
       animationType,
     });
 
