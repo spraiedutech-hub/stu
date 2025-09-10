@@ -11,7 +11,6 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
-import type {MediaPart} from 'genkit';
 
 const Generate3DMeshFromImageInputSchema = z.object({
   photoDataUri: z
@@ -30,6 +29,9 @@ const Generate3DMeshFromImageOutputSchema = z.object({
     .describe(
       'The generated 3D mesh data as a data URI, typically in a format like OBJ or GLTF.'
     ),
+    previewImageUri: z
+    .string()
+    .describe('A data URI of a preview image of the generated 3D model.'),
 });
 export type Generate3DMeshFromImageOutput = z.infer<typeof Generate3DMeshFromImageOutputSchema>;
 
@@ -39,22 +41,6 @@ export async function generate3DMeshFromImage(
   return generate3DMeshFromImageFlow(input);
 }
 
-async function downloadAndEncode(video: MediaPart): Promise<string> {
-    const fetch = (await import('node-fetch')).default;
-    const videoUrl = `${video.media!.url}&key=${process.env.GEMINI_API_KEY}`;
-    
-    const response = await fetch(videoUrl);
-    if (!response.ok || !response.body) {
-      throw new Error(`Failed to download video: ${response.statusText}`);
-    }
-    
-    const buffer = await response.buffer();
-    const contentType = response.headers.get('content-type') || 'model/obj';
-  
-    return `data:${contentType};base64,${buffer.toString('base64')}`;
-  }
-  
-
 const generate3DMeshFromImageFlow = ai.defineFlow(
   {
     name: 'generate3DMeshFromImageFlow',
@@ -62,48 +48,39 @@ const generate3DMeshFromImageFlow = ai.defineFlow(
     outputSchema: Generate3DMeshFromImageOutputSchema,
   },
   async ({photoDataUri, prompt, style}) => {
-    let { operation } = await ai.generate({
-        model: googleAI.model('veo-2.0-generate-001'),
-        prompt: [
-          { media: { url: photoDataUri } },
-          {
-            text: `From the provided image, generate a basic 3D mesh model suitable as a base for animation. 
+    const llmResponse = await ai.generate({
+      prompt: `From the provided image, generate a basic 3D mesh model suitable as a base for animation. 
+Also, create a preview image of the generated model.
 Use the following prompt to guide the generation: "${prompt}".
 Apply the following style: "${style}".
 
-Return only the 3D mesh data (as a downloadable 'model/obj' part).
-Do not return text or video.`,
+Return only the 3D mesh data (as a downloadable 'model/obj' part) and a single preview image (as a downloadable 'image/png' part).
+Do not return text.`,
+      model: googleAI.model('gemini-2.5-flash-image-preview'),
+      config: { responseModalities: ['TEXT', 'IMAGE', 'DOWNLOADABLE'] },
+      input: [
+        {
+          media: {
+            url: photoDataUri,
           },
-        ],
-        config: {
-          durationSeconds: 1,
-          aspectRatio: '16:9',
         },
-      });
-  
-      if (!operation) {
-        throw new Error('Expected the model to return an operation.');
-      }
-  
-      while (!operation.done) {
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        operation = await ai.checkOperation(operation);
-      }
-  
-      if (operation.error) {
-        throw new Error(`Model generation failed: ${operation.error.message}`);
-      }
-  
-      const meshPart = operation.output?.message?.content.find(p => p.media?.contentType === 'model/obj');
-      
-      if (!meshPart || !meshPart.media?.url) {
-        throw new Error('Failed to find the generated 3D mesh in the operation result.');
-      }
+      ],
+    });
 
-      const meshDataUri = await downloadAndEncode(meshPart);
-      
-      return {
-        meshDataUri,
-      };
+    const meshPart = llmResponse.output?.content.find(
+      (p) => p.media?.contentType === 'model/obj'
+    );
+    const imagePart = llmResponse.output?.content.find(
+      (p) => p.media?.contentType === 'image/png'
+    );
+
+    if (!meshPart?.media?.url || !imagePart?.media?.url) {
+      throw new Error('Failed to generate 3D model or preview image.');
+    }
+
+    return {
+      meshDataUri: meshPart.media.url,
+      previewImageUri: imagePart.media.url,
+    };
   }
 );

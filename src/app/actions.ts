@@ -18,17 +18,20 @@ const GenerateModelSchema = z.object({
 
 const AnimateModelSchema = z.object({
     meshDataUri: z.string().min(1, 'A 3D model is required to generate an animation.'),
+    previewImageUri: z.string().min(1, 'A preview image is required.'),
     prompt: z.string().optional(),
 });
 
 interface GenerateModelState {
   meshDataUri: string | null;
+  previewImageUri: string | null;
   videoDataUri: string | null;
   error: string | null;
 }
 
 interface AnimateModelState {
     meshDataUri: string | null;
+    previewImageUri: string | null;
     videoDataUri: string | null;
     error: string | null;
 }
@@ -54,6 +57,7 @@ export async function generateModelAction(
     const errorMessage = fieldErrors.image?.[0] || fieldErrors.prompt?.[0] || fieldErrors.style?.[0] || 'Invalid input provided.';
     return {
       meshDataUri: null,
+      previewImageUri: null,
       videoDataUri: null,
       error: errorMessage,
     };
@@ -70,12 +74,13 @@ export async function generateModelAction(
       style,
     });
 
-    if (!result.meshDataUri) {
-      throw new Error('The 3D model could not be generated.');
+    if (!result.meshDataUri || !result.previewImageUri) {
+      throw new Error('The 3D model and preview could not be generated.');
     }
 
     return {
       meshDataUri: result.meshDataUri,
+      previewImageUri: result.previewImageUri,
       videoDataUri: null,
       error: null,
     };
@@ -84,6 +89,7 @@ export async function generateModelAction(
     console.error(e);
     return {
       meshDataUri: null,
+      previewImageUri: null,
       videoDataUri: null,
       error: `Generation failed: ${errorMessage}`,
     };
@@ -96,6 +102,7 @@ export async function createAnimationAction(
 ): Promise<AnimateModelState> {
     const validatedFields = AnimateModelSchema.safeParse({
         meshDataUri: formData.get('meshDataUri'),
+        previewImageUri: formData.get('previewImageUri'),
         prompt: formData.get('animation-prompt'),
     });
 
@@ -106,7 +113,7 @@ export async function createAnimationAction(
         };
     }
     
-    const { meshDataUri, prompt } = validatedFields.data;
+    const { meshDataUri, previewImageUri, prompt } = validatedFields.data;
 
     try {
         const result = await generateAnimationFromMesh({
@@ -120,6 +127,8 @@ export async function createAnimationAction(
 
         return {
             ...prevState,
+            meshDataUri,
+            previewImageUri,
             videoDataUri: result.videoDataUri,
             error: null,
         };

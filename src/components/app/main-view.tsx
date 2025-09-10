@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useActionState } from 'react';
 import { generateModelAction, createAnimationAction } from '@/app/actions';
 import ControlPanel from './control-panel';
@@ -15,22 +15,20 @@ const stylePresets = [
   { id: 'claymation', label: 'Claymation', description: 'A stop-motion, handcrafted look.' },
 ];
 
-const initialModelState: { meshDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, videoDataUri: null, error: null };
-const initialAnimationState: { meshDataUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, videoDataUri: null, error: null };
+const initialModelState: { meshDataUri: string | null; previewImageUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, previewImageUri: null, videoDataUri: null, error: null };
+const initialAnimationState: { meshDataUri: string | null; previewImageUri: string | null; videoDataUri: string | null; error: string | null; } = { meshDataUri: null, previewImageUri: null, videoDataUri: null, error: null };
 
 export default function MainView() {
   const [modelState, modelAction, isModelPending] = useActionState(generateModelAction, initialModelState);
   const [animationState, animationAction, isAnimationPending] = useActionState(createAnimationAction, initialAnimationState);
   const { toast } = useToast();
 
-  // Combine states for the PreviewPanel, ensuring the latest data is always shown.
-  // When an animation is created, its state will include the original mesh and preview data.
   const displayState = {
     meshDataUri: animationState.meshDataUri || modelState.meshDataUri,
+    previewImageUri: animationState.previewImageUri || modelState.previewImageUri,
     videoDataUri: animationState.videoDataUri,
   }
 
-  // Handle errors from both actions
   useEffect(() => {
     const error = modelState.error || animationState.error;
     if (error) {
@@ -42,11 +40,12 @@ export default function MainView() {
     }
   }, [modelState.error, animationState.error, toast]);
 
-  // When animation action is triggered, it needs access to the current mesh and preview data.
-  // We create a new form action function that injects this data.
   const animationActionWithState = (formData: FormData) => {
     if (displayState.meshDataUri) {
       formData.set('meshDataUri', displayState.meshDataUri);
+    }
+    if (displayState.previewImageUri) {
+        formData.set('previewImageUri', displayState.previewImageUri);
     }
     animationAction(formData);
   };
@@ -61,6 +60,7 @@ export default function MainView() {
       <div className="lg:col-span-8 xl:col-span-9">
         <PreviewPanel 
             meshDataUri={displayState.meshDataUri}
+            previewImageUri={displayState.previewImageUri}
             videoDataUri={displayState.videoDataUri}
             isModelPending={isModelPending}
             isAnimationPending={isAnimationPending}
