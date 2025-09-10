@@ -35,7 +35,7 @@ const ReactiveImage = ({ src, alt }: { src: string; alt: string }) => {
 
     const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
         if (!containerRef.current) return;
-        const { left, top, width, height } = containerref.current.getboundingclientrect();
+        const { left, top, width, height } = containerRef.current.getBoundingClientRect();
         const x = (e.clientX - left) / width - 0.5;
         const y = (e.clientY - top) / height - 0.5;
 
