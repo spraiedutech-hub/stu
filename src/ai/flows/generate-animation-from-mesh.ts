@@ -73,6 +73,9 @@ const generateAnimationFromMeshFlow = ai.defineFlow(
         case 'crumble':
             animationPrompt = 'Animate the provided 3D model to look like it is slowly crumbling into dust.';
             break;
+        case 'dismantle':
+            animationPrompt = 'Create an animation where the provided 3D model gracefully disassembles into its core components, which then float apart before reassembling back into the original model.';
+            break;
         case 'custom':
         default:
             animationPrompt = prompt || 'Create a smooth, 360-degree turntable animation of the provided 3D model.';

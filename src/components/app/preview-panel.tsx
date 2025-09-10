@@ -24,6 +24,7 @@ const animationPresets = [
     { id: 'turntable', label: 'Turntable', description: 'A smooth, 360-degree rotation.' },
     { id: 'bounce', label: 'Bounce', description: 'A playful, bouncing animation.' },
     { id: 'crumble', label: 'Crumble', description: 'The model slowly crumbles to dust.' },
+    { id: 'dismantle', label: 'Dismantle', description: 'The model disassembles and reassembles.' },
     { id: 'custom', label: 'Custom', description: 'Write your own animation prompt.' },
   ];
 
