@@ -1,47 +1,17 @@
 'use client';
 
-import { Suspense, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import Image from 'next/image';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stage } from '@react-three/drei';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { useLoader } from '@react-three/fiber';
-import * as THREE from 'three';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Download, Film, LoaderCircle, ZoomIn } from 'lucide-react';
+import { Download, Film, LoaderCircle } from 'lucide-react';
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
 }
-
-const Model = ({ dataUri }: { dataUri: string }) => {
-  const isGltf = dataUri.startsWith('data:model/gltf+json') || dataUri.startsWith('data:model/gltf-binary');
-  const Loader = isGltf ? GLTFLoader : OBJLoader;
-  
-  const model = useLoader(Loader as any, dataUri) as (THREE.Group | { scene: THREE.Group });
-
-  const scene = 'scene' in model ? model.scene : model;
-
-  // Center and scale the model
-  useMemo(() => {
-    const box = new THREE.Box3().setFromObject(scene);
-    const center = box.getCenter(new THREE.Vector3());
-    scene.position.sub(center); // center the model
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const scale = 5 / maxDim;
-    scene.scale.set(scale, scale, scale);
-  }, [scene]);
-
-  return <primitive object={scene} />;
-};
-
 
 const PreviewPanel = ({ meshDataUri }: PreviewPanelProps) => {
   const { pending } = useFormStatus();
@@ -83,32 +53,19 @@ const PreviewPanel = ({ meshDataUri }: PreviewPanelProps) => {
     }
 
     if (meshDataUri) {
-      return (
-        <div className="space-y-4">
-            <div className="relative aspect-video w-full rounded-lg bg-secondary/50">
-              <Canvas camera={{ fov: 75, position: [0, 0, 8] }}>
-                <Suspense fallback={
-                    <group>
-                        <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
-                    </group>
-                }>
-                  <Stage environment="studio" intensity={0.5}>
-                    <Model dataUri={meshDataUri} />
-                  </Stage>
-                  <OrbitControls enableZoom={true} />
-                </Suspense>
-              </Canvas>
-              <div className="absolute bottom-2 left-2 flex items-center gap-2 rounded-full bg-background/70 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm">
-                <ZoomIn className="h-4 w-4" />
-                <span>Use mouse to orbit, pan, and zoom</span>
+        return (
+            <div className="space-y-4">
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-secondary/50 flex flex-col items-center justify-center p-8 text-center">
+                <Film className="h-16 w-16 text-primary" />
+                <h3 className="mt-4 text-xl font-semibold tracking-tight">Generation Complete!</h3>
+                <p className="mt-2 text-muted-foreground">Your 3D model is ready to be downloaded.</p>
               </div>
+              <Button onClick={handleDownload} className="w-full sm:w-auto">
+                <Download className="mr-2" />
+                Download Model
+              </Button>
             </div>
-          <Button onClick={handleDownload} className="w-full sm:w-auto" variant="outline">
-            <Download className="mr-2" />
-            Download Model
-          </Button>
-        </div>
-      );
+          );
     }
     
     if (placeholder) {
