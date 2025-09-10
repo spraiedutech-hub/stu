@@ -107,9 +107,19 @@ export default function MainView() {
                       </span>
                   ))}
               </div>
-              <div className="animated-title flex items-center justify-center gap-2">
-                <MapPin className="h-4 w-4 animated-letter" />
-                <span className="animated-letter">{line2}</span>
+              <div className="animated-title flex items-center justify-center gap-1">
+                  {[
+                    <MapPin key="map-pin" className="h-4 w-4" />,
+                    ...line2.split(''),
+                  ].map((char, index) => (
+                    <span
+                      key={index}
+                      className="animated-letter"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      {typeof char === 'string' && char === ' ' ? '\u00A0' : char}
+                    </span>
+                  ))}
               </div>
             </footer>
         </div>
