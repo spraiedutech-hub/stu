@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UploadCloud, Sparkles, LoaderCircle, Mic, MicOff, Camera, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
+import { Separator } from '../ui/separator';
 
 interface Preset {
   id: string;
@@ -212,12 +213,15 @@ const ControlPanel: FC<ControlPanelProps> = ({ presets }) => {
           <CardDescription>Upload an image and guide the generation.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <div className="flex items-center justify-end">
-              <Button variant="outline" size="sm" onClick={() => setIsCameraOpen(true)}>
-                <Camera className="mr-2" />
-                Camera
+          <div className="space-y-4 flex flex-col items-center">
+              <Button variant="outline" size="sm" onClick={() => setIsCameraOpen(true)} className="w-full">
+                  <Camera className="mr-2" />
+                  Use Camera
               </Button>
+            <div className="w-full flex items-center gap-2">
+                <Separator className="flex-1" />
+                <span className="text-xs text-muted-foreground">OR</span>
+                <Separator className="flex-1" />
             </div>
             <div className="w-full">
               <label
