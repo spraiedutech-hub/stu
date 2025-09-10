@@ -1,16 +1,47 @@
 'use client';
 
+import { Suspense, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import Image from 'next/image';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Stage } from '@react-three/drei';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { useLoader } from '@react-three/fiber';
+import * as THREE from 'three';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Download, Film, LoaderCircle } from 'lucide-react';
+import { Download, Film, LoaderCircle, ZoomIn } from 'lucide-react';
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
 }
+
+const Model = ({ dataUri }: { dataUri: string }) => {
+  const isGltf = dataUri.startsWith('data:model/gltf+json') || dataUri.startsWith('data:model/gltf-binary');
+  const Loader = isGltf ? GLTFLoader : OBJLoader;
+  
+  const model = useLoader(Loader as any, dataUri) as (THREE.Group | { scene: THREE.Group });
+
+  const scene = 'scene' in model ? model.scene : model;
+
+  // Center and scale the model
+  useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const center = box.getCenter(new THREE.Vector3());
+    scene.position.sub(center); // center the model
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 5 / maxDim;
+    scene.scale.set(scale, scale, scale);
+  }, [scene]);
+
+  return <primitive object={scene} />;
+};
+
 
 const PreviewPanel = ({ meshDataUri }: PreviewPanelProps) => {
   const { pending } = useFormStatus();
@@ -22,10 +53,9 @@ const PreviewPanel = ({ meshDataUri }: PreviewPanelProps) => {
     link.href = meshDataUri;
     
     try {
-      // For 3D models, we'll suggest a .obj extension
       if (meshDataUri.startsWith('data:model/obj')) {
         link.download = `spraivismeh-model.obj`;
-      } else if (meshDataUri.startsWith('data:model/gltf+json')) {
+      } else if (meshDataUri.startsWith('data:model/gltf+json') || meshDataUri.startsWith('data:model/gltf-binary')) {
         link.download = `spraivismeh-model.gltf`;
       } else {
         const mimeType = meshDataUri.split(';')[0].split(':')[1];
@@ -33,7 +63,6 @@ const PreviewPanel = ({ meshDataUri }: PreviewPanelProps) => {
         link.download = `spraivismeh-output.${extension}`;
       }
     } catch (error) {
-      // Fallback for general data URIs
       link.download = 'spraivismeh-output';
     }
 
@@ -54,15 +83,25 @@ const PreviewPanel = ({ meshDataUri }: PreviewPanelProps) => {
     }
 
     if (meshDataUri) {
-      // A simple display for the 3D mesh data as text
       return (
         <div className="space-y-4">
-            <div className="aspect-video w-full rounded-lg bg-secondary/50 p-4">
-                <h3 className="text-lg font-semibold">Generated 3D Mesh Data</h3>
-                <p className="text-sm text-muted-foreground mb-2">A 3D viewer would be needed to display this model. You can download the data below.</p>
-                <div className="w-full h-48 overflow-y-auto bg-background p-2 rounded-md border text-xs">
-                    <pre><code>{meshDataUri.substring(0, 500)}...</code></pre>
-                </div>
+            <div className="relative aspect-video w-full rounded-lg bg-secondary/50">
+              <Canvas camera={{ fov: 75, position: [0, 0, 8] }}>
+                <Suspense fallback={
+                    <group>
+                        <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
+                    </group>
+                }>
+                  <Stage environment="studio" intensity={0.5}>
+                    <Model dataUri={meshDataUri} />
+                  </Stage>
+                  <OrbitControls enableZoom={true} />
+                </Suspense>
+              </Canvas>
+              <div className="absolute bottom-2 left-2 flex items-center gap-2 rounded-full bg-background/70 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm">
+                <ZoomIn className="h-4 w-4" />
+                <span>Use mouse to orbit, pan, and zoom</span>
+              </div>
             </div>
           <Button onClick={handleDownload} className="w-full sm:w-auto" variant="outline">
             <Download className="mr-2" />
