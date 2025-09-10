@@ -64,6 +64,10 @@ export default function MainView() {
     animationAction(formData);
   };
 
+  const line1 = "Created by SPR AI Edutech";
+  const line2 = "Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287";
+
+
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
       <div className="lg:col-span-4 xl:col-span-3">
@@ -92,11 +96,29 @@ export default function MainView() {
                 />
             </div>
             <footer className="w-full py-4 text-center text-sm text-foreground/50">
-              <p>Created by SPR AI Edutech</p>
-              <p className="flex items-center justify-center gap-2">
+              <div className="animated-title flex items-center justify-center">
+                  {line1.split('').map((letter, index) => (
+                      <span
+                          key={index}
+                          className="animated-letter"
+                          style={{ animationDelay: `${index * 0.05}s` }}
+                      >
+                          {letter === ' ' ? '\u00A0' : letter}
+                      </span>
+                  ))}
+              </div>
+              <div className="animated-title flex items-center justify-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287
-              </p>
+                {line2.split('').map((letter, index) => (
+                    <span
+                        key={index}
+                        className="animated-letter"
+                        style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                        {letter === ' ' ? '\u00A0' : letter}
+                    </span>
+                ))}
+              </div>
             </footer>
         </div>
       </div>
