@@ -8,6 +8,9 @@ export default function Home() {
       <main className="container mx-auto flex-1 px-4 py-8 md:px-6">
         <MainView />
       </main>
+      <footer className="py-4 text-center text-sm text-foreground/50">
+        Created by SPR AI Edutech
+      </footer>
     </div>
   );
 }
