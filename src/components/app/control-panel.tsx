@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UploadCloud, Sparkles, LoaderCircle, Mic, MicOff, Camera, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
 import { Separator } from '../ui/separator';
+import type { Language } from '@/app/page';
 
 interface Preset {
   id: string;
@@ -26,6 +27,9 @@ interface ControlPanelProps {
   setImagePreview: (value: string | null) => void;
   imageFile: File | null;
   setImageFile: (value: File | null) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  translations: any;
 }
 
 // Extend window type for SpeechRecognition
@@ -36,18 +40,18 @@ declare global {
   }
 }
 
-function SubmitButton({ imageSelected, isPending }: { imageSelected: boolean, isPending: boolean }) {
+function SubmitButton({ imageSelected, isPending, text }: { imageSelected: boolean, isPending: boolean, text: string }) {
   return (
     <Button type="submit" className="w-full" disabled={isPending || !imageSelected}>
       {isPending ? (
         <>
           <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-          Generating...
+          {text}
         </>
       ) : (
         <>
           <Sparkles className="mr-2 h-4 w-4" />
-          Generate Model
+          {text}
         </>
       )}
     </Button>
@@ -60,11 +64,14 @@ const ControlPanel: FC<ControlPanelProps> = ({
     imagePreview,
     setImagePreview,
     imageFile,
-    setImageFile
+    setImageFile,
+    language,
+    setLanguage,
+    translations
 }) => {
   const [prompt, setPrompt] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [language, setLanguage] = useState('en-US'); // 'en-US' for English, 'kn-IN' for Kannada
+  const [speechLanguage, setSpeechLanguage] = useState(language === 'en' ? 'en-US' : 'kn-IN');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   
@@ -75,12 +82,16 @@ const ControlPanel: FC<ControlPanelProps> = ({
   const { toast } = useToast();
 
   useEffect(() => {
+    setSpeechLanguage(language === 'en' ? 'en-US' : 'kn-IN');
+  }, [language]);
+
+  useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = language;
+      recognition.lang = speechLanguage;
 
       recognition.onresult = (event: any) => {
         let interimTranscript = '';
@@ -130,7 +141,7 @@ const ControlPanel: FC<ControlPanelProps> = ({
         recognitionRef.current?.abort();
         recognitionRef.current = null;
     }
-  }, [language, toast]);
+  }, [speechLanguage, toast]);
 
   useEffect(() => {
     if (isCameraOpen) {
@@ -234,7 +245,7 @@ const ControlPanel: FC<ControlPanelProps> = ({
     <>
       <Card className="sticky top-24">
         <CardHeader className="pb-4">
-          <CardDescription>Upload an image and guide the generation.</CardDescription>
+          <CardDescription>{translations.cardDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4 flex flex-col items-center">
@@ -254,7 +265,7 @@ const ControlPanel: FC<ControlPanelProps> = ({
                 ) : (
                   <>
                     <UploadCloud className="h-8 w-8" />
-                    <span>Click or drag to upload</span>
+                    <span>{translations.uploadLabel}</span>
                   </>
                 )}
               </label>
@@ -271,18 +282,18 @@ const ControlPanel: FC<ControlPanelProps> = ({
             </div>
             <div className="w-full flex items-center gap-2">
                 <Separator className="flex-1" />
-                <span className="text-xs text-muted-foreground">OR</span>
+                <span className="text-xs text-muted-foreground">{translations.orSeparator}</span>
                 <Separator className="flex-1" />
             </div>
             <Button variant="outline" size="sm" onClick={(e) => { e.preventDefault(); setIsCameraOpen(true); }} className="w-full">
                 <Camera className="mr-2" />
-                Use Camera
+                {translations.useCamera}
             </Button>
           </div>
 
           <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="prompt">Custom Prompt (Optional)</Label>
+                <Label htmlFor="prompt">{translations.customPromptLabel}</Label>
                 <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); toggleListening(); }} className="h-8 w-8">
                   {isListening ? <MicOff className="text-destructive" /> : <Mic />}
                 </Button>
@@ -290,26 +301,26 @@ const ControlPanel: FC<ControlPanelProps> = ({
               <Textarea
                 id="prompt"
                 name="prompt"
-                placeholder="e.g., 'a futuristic version of the object', 'make it look like it is made of wood'"
+                placeholder={translations.customPromptPlaceholder}
                 className="min-h-[80px]"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
               />
               <div className="flex items-center gap-2 pt-1">
-                  <span className="text-xs text-muted-foreground">Language:</span>
+                  <span className="text-xs text-muted-foreground">{translations.languageLabel}</span>
                   <Button
-                      variant={language === 'en-US' ? 'secondary' : 'ghost'}
+                      variant={language === 'en' ? 'secondary' : 'ghost'}
                       size="sm"
                       className="h-7 px-2"
-                      onClick={(e) => { e.preventDefault(); setLanguage('en-US'); }}
+                      onClick={(e) => { e.preventDefault(); setLanguage('en'); }}
                   >
                       EN
                   </Button>
                   <Button
-                      variant={language === 'kn-IN' ? 'secondary' : 'ghost'}
+                      variant={language === 'kn' ? 'secondary' : 'ghost'}
                       size="sm"
                       className="h-7 px-2"
-                      onClick={(e) => { e.preventDefault(); setLanguage('kn-IN'); }}
+                      onClick={(e) => { e.preventDefault(); setLanguage('kn'); }}
                   >
                       KN
                   </Button>
@@ -317,10 +328,10 @@ const ControlPanel: FC<ControlPanelProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="style-preset">Style Preset</Label>
+            <Label htmlFor="style-preset">{translations.stylePresetLabel}</Label>
             <Select name="style" defaultValue={presets[0].id}>
                 <SelectTrigger id="style-preset">
-                    <SelectValue placeholder="Select a style" />
+                    <SelectValue placeholder={translations.stylePresetPlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
                     {presets.map((preset) => (
@@ -336,13 +347,13 @@ const ControlPanel: FC<ControlPanelProps> = ({
           </div>
         </CardContent>
         <CardFooter>
-          <SubmitButton imageSelected={!!imagePreview} isPending={isModelPending}/>
+          <SubmitButton imageSelected={!!imagePreview} isPending={isModelPending} text={isModelPending ? translations.generating : translations.generateModel}/>
         </CardFooter>
       </Card>
       <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Capture from Camera</DialogTitle>
+            <DialogTitle>{translations.cameraTitle}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="relative flex items-center justify-center rounded-md border bg-secondary/50">
@@ -351,8 +362,8 @@ const ControlPanel: FC<ControlPanelProps> = ({
                 {hasCameraPermission === false && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/80 p-4 text-center">
                         <AlertCircle className="h-10 w-10 text-destructive" />
-                        <h3 className="font-semibold">Camera Access Denied</h3>
-                        <p className="text-sm text-muted-foreground">Please enable camera permissions in your browser to use this feature.</p>
+                        <h3 className="font-semibold">{translations.cameraAccessDenied}</h3>
+                        <p className="text-sm text-muted-foreground">{translations.cameraAccessDescription}</p>
                     </div>
                 )}
                 {hasCameraPermission === null && (
@@ -364,18 +375,18 @@ const ControlPanel: FC<ControlPanelProps> = ({
             {hasCameraPermission === false && (
                  <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Permission Required</AlertTitle>
+                    <AlertTitle>{translations.permissionRequired}</AlertTitle>
                     <AlertDescription>
-                        Camera access is needed to capture a photo. Please update your browser settings.
+                        {translations.permissionDescription}
                     </AlertDescription>
                 </Alert>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCameraOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsCameraOpen(false)}>{translations.cancel}</Button>
             <Button onClick={handleCapture} disabled={!hasCameraPermission}>
               <Camera className="mr-2" />
-              Capture Photo
+              {translations.capturePhoto}
             </Button>
           </DialogFooter>
         </DialogContent>
