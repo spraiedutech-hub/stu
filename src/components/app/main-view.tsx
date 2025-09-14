@@ -66,12 +66,21 @@ export default function MainView() {
 
   const line1 = "Created by SPR AI Edutech";
   const line2 = "Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287";
+  const headline = 'Create your 3D model';
 
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3d text-3xl font-bold tracking-tight text-center text-foreground/90 font-headline">
-        Create your 3D model
+      <h2 className="animated-title text-3xl font-bold tracking-tight text-center text-foreground/90 font-headline">
+        {headline.split('').map((letter, index) => (
+            <span
+            key={index}
+            className="animated-letter"
+            style={{ animationDelay: `${index * 0.05}s` }}
+            >
+            {letter === ' ' ? '\u00A0' : letter}
+            </span>
+        ))}
       </h2>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <div className="lg:col-span-4 xl:col-span-3">
