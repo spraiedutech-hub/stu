@@ -70,7 +70,7 @@ export default function MainView() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight text-center text-foreground/90 font-headline">
+      <h2 className="text-3d text-3xl font-bold tracking-tight text-center text-foreground/90 font-headline">
         Create your 3D model
       </h2>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
