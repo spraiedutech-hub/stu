@@ -163,8 +163,3 @@ body {
       -7px -7px 15px hsla(var(--accent), 0.3);
   }
 }
-
-.font-kannada {
-  --font-body: 'Noto Sans Kannada', 'Inter', sans-serif;
-  --font-headline: 'Noto Sans Kannada', 'Orbitron', sans-serif;
-}

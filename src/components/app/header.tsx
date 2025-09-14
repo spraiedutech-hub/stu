@@ -1,15 +1,9 @@
 import { Cuboid } from 'lucide-react';
 import type { FC } from 'react';
-import type { Language } from '@/app/page';
 
-const titles = {
-    en: 'SPR AI VisMesh',
-    kn: 'SPR AI ವಿಸ್ಮೇಶ್',
-};
+const title = 'SPR AI VisMesh';
 
-
-const Header: FC<{language: Language}> = ({ language }) => {
-  const title = titles[language];
+const Header: FC = () => {
   return (
     <header className="border-b border-white/10 bg-card/50 backdrop-blur-lg sticky top-0 z-10">
       <div className="container mx-auto flex h-16 items-center px-4 md:px-6">

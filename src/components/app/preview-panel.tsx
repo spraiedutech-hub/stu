@@ -10,8 +10,6 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useRef, MouseEvent } from 'react';
-import { cn } from '@/lib/utils';
-import type { Language } from '@/app/page';
 
 interface PreviewPanelProps {
   meshDataUri: string | null;
@@ -21,58 +19,15 @@ interface PreviewPanelProps {
   isAnimationPending: boolean;
   animationAction: (formData: FormData) => void;
   inputImagePreview: string | null;
-  language: Language;
 }
 
-const translations = {
-    en: {
-        generatingLife: 'SPR AI Bringing life...',
-        generatingTitle: 'Generation in progress...',
-        animatingTitle: 'Animation in progress...',
-        generatingDescription: 'This can take up to a minute. Please be patient.',
-        downloadAnimation: 'Download Animation',
-        animationStyleLabel: 'Animation Style',
-        animationStylePlaceholder: 'Select an animation style',
-        customPromptLabel: 'Custom Animation Prompt',
-        customPromptPlaceholder: "e.g., 'a slow-motion zoom-in', 'make it dance the salsa'",
-        downloadModel: 'Download Model',
-        generateAnimation: 'Generate Animation',
-        generatingButton: 'Generating...',
-        placeholderTitle: 'Your 3D model will appear here',
-        placeholderDescription: 'Upload an image and choose a preset to get started.',
-        animationPresets: [
-            { id: 'turntable', label: 'Turntable', description: 'A smooth, 360-degree rotation.' },
-            { id: 'bounce', label: 'Bounce', description: 'A playful, bouncing animation.' },
-            { id: 'crumble', label: 'Crumble', description: 'The model slowly crumbles to dust.' },
-            { id: 'dismantle', label: 'Dismantle', description: 'The model disassembles and reassembles.' },
-            { id: 'custom', label: 'Custom', description: 'Write your own animation prompt.' },
-        ],
-    },
-    kn: {
-        generatingLife: 'SPR AI ಜೀವ ತರುತ್ತಿದೆ...',
-        generatingTitle: 'ರಚನೆ ಪ್ರಗತಿಯಲ್ಲಿದೆ...',
-        animatingTitle: 'ಅನಿಮೇಷನ್ ಪ್ರಗತಿಯಲ್ಲಿದೆ...',
-        generatingDescription: 'ಇದು ಒಂದು ನಿಮಿಷದವರೆಗೆ ತೆಗೆದುಕೊಳ್ಳಬಹುದು. ದಯವಿಟ್ಟು ತಾಳ್ಮೆಯಿಂದಿರಿ.',
-        downloadAnimation: 'ಅನಿಮೇಷನ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ',
-        animationStyleLabel: 'ಅನಿಮೇಷನ್ ಶೈಲಿ',
-        animationStylePlaceholder: 'ಅನಿಮೇಷನ್ ಶೈಲಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
-        customPromptLabel: 'ಕಸ್ಟಮ್ ಅನಿಮೇಷನ್ ಪ್ರಾಂಪ್ಟ್',
-        customPromptPlaceholder: "ಉದಾ, 'ನಿಧಾನ-ಚಲನೆಯ ಜೂಮ್-ಇನ್', 'ಅದನ್ನು ಸಾಲ್ಸಾ ನೃತ್ಯ ಮಾಡುವಂತೆ ಮಾಡಿ'",
-        downloadModel: 'ಮಾದರಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ',
-        generateAnimation: 'ಅನಿಮೇಷನ್ ರಚಿಸಿ',
-        generatingButton: 'ರಚಿಸಲಾಗುತ್ತಿದೆ...',
-        placeholderTitle: 'ನಿಮ್ಮ 3D ಮಾದರಿ ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ',
-        placeholderDescription: 'ಪ್ರಾರಂಭಿಸಲು ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಮತ್ತು ಪೂರ್ವನಿಗದಿಯನ್ನು ಆರಿಸಿ.',
-        animationPresets: [
-            { id: 'turntable', label: 'ಟರ್ನ್ಟೇಬಲ್', description: 'ನಯವಾದ, 360-ಡಿಗ್ರಿ ತಿರುಗುವಿಕೆ.' },
-            { id: 'bounce', label: ' ಪುಟಿಯುವುದು', description: 'ಒಂದು ತಮಾಷೆಯ, ಪುಟಿಯುವ ಅನಿಮೇಷನ್.' },
-            { id: 'crumble', label: 'ಕುಸಿಯುವುದು', description: 'ಮಾದರಿ ನಿಧಾನವಾಗಿ ಧೂಳಿನಲ್ಲಿ ಕುಸಿಯುತ್ತದೆ.' },
-            { id: 'dismantle', label: 'ಡಿಸ್ಮ್ಯಾಂಟಲ್', description: 'ಮಾದರಿಯು ಡಿಸ್ಅಸೆಂಬಲ್ ಆಗುತ್ತದೆ ಮತ್ತು ಮತ್ತೆ ಜೋಡಿಸುತ್ತದೆ.' },
-            { id: 'custom', label: 'ಕಸ್ಟಮ್', description: 'ನಿಮ್ಮ ಸ್ವಂತ ಅನಿಮೇಷನ್ ಪ್ರಾಂಪ್ಟ್ ಬರೆಯಿರಿ.' },
-        ],
-    },
-};
-
+const animationPresets = [
+    { id: 'turntable', label: 'Turntable', description: 'A smooth, 360-degree rotation.' },
+    { id: 'bounce', label: 'Bounce', description: 'A playful, bouncing animation.' },
+    { id: 'crumble', label: 'Crumble', description: 'The model slowly crumbles to dust.' },
+    { id: 'dismantle', label: 'Dismantle', description: 'The model disassembles and reassembles.' },
+    { id: 'custom', label: 'Custom', description: 'Write your own animation prompt.' },
+];
 
 const ReactiveImage = ({ src, alt }: { src: string; alt: string }) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -119,10 +74,8 @@ const PreviewPanel = ({
     isAnimationPending,
     animationAction,
     inputImagePreview,
-    language,
 }: PreviewPanelProps) => {
-  const currentTranslations = translations[language];
-  const [animationStyle, setAnimationStyle] = useState(currentTranslations.animationPresets[0].id);
+  const [animationStyle, setAnimationStyle] = useState(animationPresets[0].id);
   const placeholder = PlaceHolderImages.find(p => p.id === 'preview-placeholder');
 
   const handleDownload = (dataUri: string | null, defaultName: string) => {
@@ -167,7 +120,7 @@ const PreviewPanel = ({
                         <Sparkles className="h-16 w-16 text-primary animate-pulse" />
                     </div>
                     <h3 className="text-xl font-semibold tracking-tight text-white animated-title">
-                        {currentTranslations.generatingLife.split('').map((letter, index) => (
+                        {'SPR AI Bringing life...'.split('').map((letter, index) => (
                             <span
                                 key={index}
                                 className="animated-letter"
@@ -183,8 +136,8 @@ const PreviewPanel = ({
     }
     
     if (isModelPending || isAnimationPending) {
-      const title = isAnimationPending ? currentTranslations.animatingTitle : currentTranslations.generatingTitle;
-      const description = currentTranslations.generatingDescription;
+      const title = isAnimationPending ? 'Animation in progress...' : 'Generation in progress...';
+      const description = 'This can take up to a minute. Please be patient.';
 
       return (
         <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed bg-secondary/50 p-8 text-center">
@@ -203,7 +156,7 @@ const PreviewPanel = ({
               </div>
               <Button onClick={() => handleDownload(videoDataUri, 'spraivismeh-animation.mp4')} className="w-full sm:w-auto">
                 <Download className="mr-2" />
-                {currentTranslations.downloadAnimation}
+                Download Animation
               </Button>
             </div>
           );
@@ -220,13 +173,13 @@ const PreviewPanel = ({
                 />
 
               <div className="space-y-2">
-                <Label htmlFor="animation-style">{currentTranslations.animationStyleLabel}</Label>
+                <Label htmlFor="animation-style">Animation Style</Label>
                 <Select name="animationStyle" value={animationStyle} onValueChange={setAnimationStyle}>
                     <SelectTrigger id="animation-style">
-                        <SelectValue placeholder={currentTranslations.animationStylePlaceholder} />
+                        <SelectValue placeholder="Select an animation style" />
                     </SelectTrigger>
                     <SelectContent>
-                        {currentTranslations.animationPresets.map((preset) => (
+                        {animationPresets.map((preset) => (
                             <SelectItem key={preset.id} value={preset.id}>
                                 <div className="flex flex-col">
                                     <span>{preset.label}</span>
@@ -240,11 +193,11 @@ const PreviewPanel = ({
 
               {animationStyle === 'custom' && (
                 <div className="space-y-2">
-                  <Label htmlFor="animation-prompt">{currentTranslations.customPromptLabel}</Label>
+                  <Label htmlFor="animation-prompt">Custom Animation Prompt</Label>
                   <Textarea
                     id="animation-prompt"
                     name="animation-prompt"
-                    placeholder={currentTranslations.customPromptPlaceholder}
+                    placeholder="e.g., 'a slow-motion zoom-in', 'make it dance the salsa'"
                     className="min-h-[80px]"
                   />
                 </div>
@@ -254,18 +207,18 @@ const PreviewPanel = ({
               <div className="flex flex-wrap gap-2">
                 <Button onClick={(e) => { e.preventDefault(); handleDownload(meshDataUri, 'spraivismeh-model.obj'); }} className="w-full sm:w-auto" variant="secondary">
                     <Download className="mr-2" />
-                    {currentTranslations.downloadModel}
+                    Download Model
                 </Button>
                 <Button type="submit" className="w-full sm:w-auto">
                     {isAnimationPending ? (
                         <>
                             <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                            {currentTranslations.generatingButton}
+                            Generating...
                         </>
                     ) : (
                         <>
                             <Video className="mr-2" />
-                            {currentTranslations.generateAnimation}
+                            Generate Animation
                         </>
                     )}
                 </Button>
@@ -286,8 +239,8 @@ const PreviewPanel = ({
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 p-8 text-center">
             <Film className="h-16 w-16 text-white/80" />
-            <h3 className="mt-4 text-xl font-semibold tracking-tight text-white">{currentTranslations.placeholderTitle}</h3>
-            <p className="mt-2 text-white/70">{currentTranslations.placeholderDescription}</p>
+            <h3 className="mt-4 text-xl font-semibold tracking-tight text-white">Your 3D model will appear here</h3>
+            <p className="mt-2 text-white/70">Upload an image and choose a preset to get started.</p>
           </div>
         </div>
       );
