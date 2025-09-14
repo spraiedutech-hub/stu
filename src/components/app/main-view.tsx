@@ -69,59 +69,64 @@ export default function MainView() {
 
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-      <div className="lg:col-span-4 xl:col-span-3">
-        <form action={modelAction}>
-            <ControlPanel
-                presets={stylePresets} 
-                isModelPending={isModelPending}
-                imagePreview={imagePreview}
-                setImagePreview={setImagePreview}
-                imageFile={imageFile}
-                setImageFile={setImageFile}
-            />
-        </form>
-      </div>
-      <div className="lg:col-span-8 xl:col-span-9">
-        <div className="flex h-full flex-col">
-            <div className="flex-1">
-                <PreviewPanel 
-                    meshDataUri={displayState.meshDataUri}
-                    previewImageUri={displayState.previewImageUri}
-                    videoDataUri={displayState.videoDataUri}
-                    isModelPending={isModelPending}
-                    isAnimationPending={isAnimationPending}
-                    animationAction={animationActionWithState}
-                    inputImagePreview={imagePreview}
-                />
-            </div>
-            <footer className="w-full py-4 text-center text-sm text-foreground/50">
-              <div className="animated-title flex items-center justify-center">
-                  {line1.split('').map((letter, index) => (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold tracking-tight text-center text-foreground/90 font-headline">
+        Create your 3D model
+      </h2>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="lg:col-span-4 xl:col-span-3">
+          <form action={modelAction}>
+              <ControlPanel
+                  presets={stylePresets} 
+                  isModelPending={isModelPending}
+                  imagePreview={imagePreview}
+                  setImagePreview={setImagePreview}
+                  imageFile={imageFile}
+                  setImageFile={setImageFile}
+              />
+          </form>
+        </div>
+        <div className="lg:col-span-8 xl:col-span-9">
+          <div className="flex h-full flex-col">
+              <div className="flex-1">
+                  <PreviewPanel 
+                      meshDataUri={displayState.meshDataUri}
+                      previewImageUri={displayState.previewImageUri}
+                      videoDataUri={displayState.videoDataUri}
+                      isModelPending={isModelPending}
+                      isAnimationPending={isAnimationPending}
+                      animationAction={animationActionWithState}
+                      inputImagePreview={imagePreview}
+                  />
+              </div>
+              <footer className="w-full py-4 text-center text-sm text-foreground/50">
+                <div className="animated-title flex items-center justify-center">
+                    {line1.split('').map((letter, index) => (
+                        <span
+                            key={index}
+                            className="animated-letter"
+                            style={{ animationDelay: `${index * 0.05}s` }}
+                        >
+                            {letter === ' ' ? '\u00A0' : letter}
+                        </span>
+                    ))}
+                </div>
+                <div className="animated-title flex items-center justify-center gap-1">
+                    {[
+                      <MapPin key="map-pin" className="h-4 w-4" />,
+                      ...line2.split(''),
+                    ].map((char, index) => (
                       <span
-                          key={index}
-                          className="animated-letter"
-                          style={{ animationDelay: `${index * 0.05}s` }}
+                        key={index}
+                        className="animated-letter"
+                        style={{ animationDelay: `${index * 0.05}s` }}
                       >
-                          {letter === ' ' ? '\u00A0' : letter}
+                        {typeof char === 'string' && char === ' ' ? '\u00A0' : char}
                       </span>
-                  ))}
-              </div>
-              <div className="animated-title flex items-center justify-center gap-1">
-                  {[
-                    <MapPin key="map-pin" className="h-4 w-4" />,
-                    ...line2.split(''),
-                  ].map((char, index) => (
-                    <span
-                      key={index}
-                      className="animated-letter"
-                      style={{ animationDelay: `${index * 0.05}s` }}
-                    >
-                      {typeof char === 'string' && char === ' ' ? '\u00A0' : char}
-                    </span>
-                  ))}
-              </div>
-            </footer>
+                    ))}
+                </div>
+              </footer>
+          </div>
         </div>
       </div>
     </div>
