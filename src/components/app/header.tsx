@@ -9,7 +9,7 @@ const Header: FC = () => {
       <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
         <div className="flex items-center gap-3">
           <Cuboid className="h-7 w-7 text-primary animate-pulse" />
-          <h1 className="text-2xl font-bold tracking-tight text-foreground animated-title font-headline">
+          <h1 className="text-2xl font-bold tracking-tight text-primary animated-title font-headline">
             {title.split('').map((letter, index) => (
               <span
                 key={index}

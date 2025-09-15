@@ -101,7 +101,7 @@ body {
 
   .animated-title:hover .animated-letter {
     animation: wave 0.5s ease-in-out forwards;
-    color: hsl(var(--primary));
+    color: hsl(var(--foreground));
   }
 
   .text-3d {
