@@ -73,7 +73,7 @@ export default function MainView() {
 
   return (
     <div className="space-y-6">
-      <h2 className="animated-title text-3xl font-bold tracking-tight text-center text-foreground/90 font-headline">
+      <h2 className="animated-title text-2xl font-bold tracking-tight text-center text-foreground/90 font-headline">
         {headline.split('').map((letter, index) => (
             <span
             key={index}
