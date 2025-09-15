@@ -66,10 +66,6 @@ export default function MainView() {
   const headline = "Create your 3D model";
   const footerLine1 = "Created by SPR AI Edutech";
   const footerLine2 = "Behind Karnataka Bank, Hosadurga, Chitradurga dist. Ph: 7022070287";
-  const footerLine2Parts = [
-    <MapPin key="map-pin" className="h-4 w-4" />,
-    ...footerLine2.split('')
-  ];
 
   return (
     <div className="space-y-6">
@@ -122,16 +118,9 @@ export default function MainView() {
                         </span>
                     ))}
                 </div>
-                <div className="animated-title flex items-center justify-center gap-1">
-                  {footerLine2Parts.map((char, index) => (
-                    <span
-                      key={index}
-                      className="animated-letter"
-                      style={{ animationDelay: `${(index + 1) * 0.05}s` }}
-                    >
-                      {typeof char === 'string' && char === ' ' ? '\u00A0' : char}
-                    </span>
-                  ))}
+                <div className="flex items-center justify-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>{footerLine2}</span>
                 </div>
               </footer>
           </div>
